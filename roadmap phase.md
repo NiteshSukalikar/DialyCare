@@ -266,21 +266,21 @@ Store dialysis booklet photos, prescriptions, blood reports, hospital reports, b
 
 | ER Step | Task | Acceptance Criteria | ER Status |
 |---|---|---|---|
-| 9.1 | Build documents screen | Documents are grouped/listed clearly | Incomplete |
-| 9.2 | Add upload flow | User can upload image, photo, or PDF from device | Incomplete |
-| 9.3 | Add document metadata | Report name, date, category, notes captured | Incomplete |
-| 9.4 | Add document categories | Dialysis Booklet, Prescription, Blood Report, KFT, CBC, Hospital Report, Bills, Other | Incomplete |
-| 9.5 | Store file locally | File/blob is saved in IndexedDB or browser-safe local storage strategy | Incomplete |
-| 9.6 | Add preview/open action | User can view uploaded images/PDFs | Incomplete |
-| 9.7 | Add edit metadata | Document title, date, category, and notes can be changed | Incomplete |
-| 9.8 | Add delete document | Document can be deleted after confirmation | Incomplete |
-| 9.9 | Add storage warning note | User understands large files use local device storage | Incomplete |
+| 9.1 | Build documents screen | Documents are grouped/listed clearly | Complete |
+| 9.2 | Add upload flow | User can upload image, photo, or PDF from device | Complete |
+| 9.3 | Add document metadata | Report name, date, category, notes captured | Complete |
+| 9.4 | Add document categories | Dialysis Booklet, Prescription, Blood Report, KFT, CBC, Hospital Report, Bills, Other | Complete |
+| 9.5 | Store file locally | File/blob is saved in IndexedDB or browser-safe local storage strategy | Complete |
+| 9.6 | Add preview/open action | User can view uploaded images/PDFs | Complete |
+| 9.7 | Add edit metadata | Document title, date, category, and notes can be changed | Complete |
+| 9.8 | Add delete document | Document can be deleted after confirmation | Complete |
+| 9.9 | Add storage warning note | User understands large files use local device storage | Complete |
 
 ## MVP Constraint
 
 | Constraint | Reason | ER Status |
 |---|---|---|
-| No OCR in MVP | Manual upload is enough for first release | Incomplete |
+| No OCR in MVP | Manual upload is enough for first release | Complete |
 
 ---
 
@@ -396,7 +396,7 @@ The MVP is complete only when all of these are done.
 | History | Past sessions can be reviewed, filtered, opened, edited, and deleted | Complete |
 | Dialyzer | Dialyzer usage increments and warns near limit | Complete |
 | Medicines | Medicine list can be managed and exported | Incomplete |
-| Documents | Reports/booklet images can be uploaded and reviewed locally | Incomplete |
+| Documents | Reports/booklet images can be uploaded and reviewed locally | Complete |
 | Dashboard | Latest patient, weight, dialyzer, and quick actions are visible | Complete |
 | Analytics | Basic trends and summary cards are available | Incomplete |
 | Backup | Full JSON export/import works reliably | Incomplete |
@@ -482,7 +482,7 @@ The MVP is complete only when all of these are done.
 | 6 | Phase 7: Dialyzer Tracker | Critical dialysis-specific safety workflow | Complete |
 | 7 | Phase 5: Dashboard | Better once real session/dialyzer data exists | Complete |
 | 8 | Phase 8: Medicines | Important supporting record area | Incomplete |
-| 9 | Phase 9: Reports & Documents | Replaces paper booklet storage | Incomplete |
+| 9 | Phase 9: Reports & Documents | Replaces paper booklet storage | Complete |
 | 10 | Phase 11: Backup & PDF Export | Mandatory before real-world daily use | Incomplete |
 | 11 | Phase 10: Analytics & Trends | Useful after enough session data exists | Incomplete |
 | 12 | Phase 12: PWA Readiness | Install/offline hardening for actual phone use | Incomplete |
