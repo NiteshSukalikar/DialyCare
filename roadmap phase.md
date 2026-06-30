@@ -220,14 +220,14 @@ Help the caregiver avoid missing dialyzer change timing.
 
 | ER Step | Task | Acceptance Criteria | ER Status |
 |---|---|---|---|
-| 7.1 | Build dialyzer tracker screen | Shows current active dialyzer and historical dialyzers | Incomplete |
-| 7.2 | Add dialyzer form | Name, start date, max usage, current usage, status captured | Incomplete |
-| 7.3 | Add usage progress indicator | Shows current usage as count and progress bar | Incomplete |
-| 7.4 | Add warning threshold | Warning appears at 10/12 or configurable near-limit usage | Incomplete |
-| 7.5 | Add change recommended state | Clear alert appears when max usage is reached | Incomplete |
-| 7.6 | Add change dialyzer workflow | Old dialyzer becomes archived and new one becomes active | Incomplete |
-| 7.7 | Link sessions to dialyzer | Session records preserve which dialyzer was used | Incomplete |
-| 7.8 | Add dialyzer history | Archived dialyzers remain viewable | Incomplete |
+| 7.1 | Build dialyzer tracker screen | Shows current active dialyzer and historical dialyzers | Complete |
+| 7.2 | Add dialyzer form | Name, start date, max usage, current usage, status captured | Complete |
+| 7.3 | Add usage progress indicator | Shows current usage as count and progress bar | Complete |
+| 7.4 | Add warning threshold | Warning appears at 10/12 or configurable near-limit usage | Complete |
+| 7.5 | Add change recommended state | Clear alert appears when max usage is reached | Complete |
+| 7.6 | Add change dialyzer workflow | Old dialyzer becomes archived and new one becomes active | Complete |
+| 7.7 | Link sessions to dialyzer | Session records preserve which dialyzer was used | Complete |
+| 7.8 | Add dialyzer history | Archived dialyzers remain viewable | Complete |
 
 ---
 
@@ -394,7 +394,7 @@ The MVP is complete only when all of these are done.
 | Patient setup | One patient can be created, edited, and persisted | Complete |
 | Add session | Dialysis session can be added in under 30 seconds | Complete |
 | History | Past sessions can be reviewed, filtered, opened, edited, and deleted | Complete |
-| Dialyzer | Dialyzer usage increments and warns near limit | Incomplete |
+| Dialyzer | Dialyzer usage increments and warns near limit | Complete |
 | Medicines | Medicine list can be managed and exported | Incomplete |
 | Documents | Reports/booklet images can be uploaded and reviewed locally | Incomplete |
 | Dashboard | Latest patient, weight, dialyzer, and quick actions are visible | Incomplete |
@@ -479,7 +479,7 @@ The MVP is complete only when all of these are done.
 | 3 | Phase 3: Patient Setup | Required before meaningful tracking | Complete |
 | 4 | Phase 4: Add Dialysis Session | Main MVP workflow and north-star metric | Incomplete |
 | 5 | Phase 6: Session History | Makes entered data useful immediately | Complete |
-| 6 | Phase 7: Dialyzer Tracker | Critical dialysis-specific safety workflow | Incomplete |
+| 6 | Phase 7: Dialyzer Tracker | Critical dialysis-specific safety workflow | Complete |
 | 7 | Phase 5: Dashboard | Better once real session/dialyzer data exists | Incomplete |
 | 8 | Phase 8: Medicines | Important supporting record area | Incomplete |
 | 9 | Phase 9: Reports & Documents | Replaces paper booklet storage | Incomplete |

@@ -11,7 +11,11 @@ export class DialyzerRepository {
   constructor(private readonly database: DialyCareDatabase = defaultDb) {}
 
   async listByPatient(patientId: string) {
-    return this.database.dialyzers.where("patientId").equals(patientId).reverse().sortBy("startedOn");
+    const dialyzers = await this.database.dialyzers.where("patientId").equals(patientId).toArray();
+    return dialyzers.sort((a, b) => {
+      if (a.status !== b.status) return a.status === "active" ? -1 : 1;
+      return b.startedOn.localeCompare(a.startedOn);
+    });
   }
 
   async get(id: string) {
@@ -31,6 +35,34 @@ export class DialyzerRepository {
     assertValid(validateDialyzer(input));
     const dialyzer = withNewRecord("dialyzer", input);
     await this.database.dialyzers.add(dialyzer);
+    return dialyzer;
+  }
+
+  async createAsOnlyActive(input: CreateDialyzerInput) {
+    assertValid(validateDialyzer(input));
+    const dialyzer = withNewRecord("dialyzer", { ...input, status: "active" as const });
+
+    await this.database.transaction("rw", this.database.dialyzers, async () => {
+      const activeDialyzers = await this.database.dialyzers
+        .where("patientId")
+        .equals(dialyzer.patientId)
+        .filter((item) => item.status === "active")
+        .toArray();
+
+      await Promise.all(
+        activeDialyzers.map((item) =>
+          this.database.dialyzers.put(
+            withUpdatedAt({
+              ...item,
+              status: "archived",
+            }),
+          ),
+        ),
+      );
+
+      await this.database.dialyzers.add(dialyzer);
+    });
+
     return dialyzer;
   }
 
