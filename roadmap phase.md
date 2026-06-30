@@ -115,15 +115,15 @@ Allow the caregiver to set up the patient once and start tracking immediately.
 
 | ER Step | Task | Acceptance Criteria | ER Status |
 |---|---|---|---|
-| 3.1 | Build welcome/setup screen | First launch sends user to setup if no patient exists | Incomplete |
-| 3.2 | Add patient profile form | Name, UHID, age, gender, hospital, consultant, emergency contact captured | Incomplete |
-| 3.3 | Add dialysis baseline form | Dry weight, dialysis frequency, default hospital, default doctor captured | Incomplete |
-| 3.4 | Add initial dialyzer setup | Current dialyzer name, start date, max usage, current usage captured | Incomplete |
-| 3.5 | Add form validation | Required fields cannot be saved empty | Incomplete |
-| 3.6 | Save patient locally | Patient data persists after browser refresh | Incomplete |
-| 3.7 | Add edit patient profile | User can update patient details after setup | Incomplete |
-| 3.8 | Add setup completion redirect | After setup, user lands on dashboard | Incomplete |
-| 3.9 | Add setup success state | User receives clear confirmation that setup is complete | Incomplete |
+| 3.1 | Build welcome/setup screen | First launch sends user to setup if no patient exists | Complete |
+| 3.2 | Add patient profile form | Name, UHID, age, gender, hospital, consultant, emergency contact captured | Complete |
+| 3.3 | Add dialysis baseline form | Dry weight, dialysis frequency, default hospital, default doctor captured | Complete |
+| 3.4 | Add initial dialyzer setup | Current dialyzer name, start date, max usage, current usage captured | Complete |
+| 3.5 | Add form validation | Required fields cannot be saved empty | Complete |
+| 3.6 | Save patient locally | Patient data persists after browser refresh | Complete |
+| 3.7 | Add edit patient profile | User can update patient details after setup | Complete |
+| 3.8 | Add setup completion redirect | After setup, user lands on dashboard | Complete |
+| 3.9 | Add setup success state | User receives clear confirmation that setup is complete | Complete |
 
 ## Success Metric
 
@@ -391,7 +391,7 @@ The MVP is complete only when all of these are done.
 
 | Area | Completion Requirement | ER Status |
 |---|---|---|
-| Patient setup | One patient can be created, edited, and persisted | Incomplete |
+| Patient setup | One patient can be created, edited, and persisted | Complete |
 | Add session | Dialysis session can be added in under 30 seconds | Incomplete |
 | History | Past sessions can be reviewed, filtered, opened, edited, and deleted | Incomplete |
 | Dialyzer | Dialyzer usage increments and warns near limit | Incomplete |
@@ -476,7 +476,7 @@ The MVP is complete only when all of these are done.
 |---|---|---|---|
 | 1 | Phase 1: Foundation | Needed before feature work | Incomplete |
 | 2 | Phase 2: Local Database | Core app depends on durable local data | Complete |
-| 3 | Phase 3: Patient Setup | Required before meaningful tracking | Incomplete |
+| 3 | Phase 3: Patient Setup | Required before meaningful tracking | Complete |
 | 4 | Phase 4: Add Dialysis Session | Main MVP workflow and north-star metric | Incomplete |
 | 5 | Phase 6: Session History | Makes entered data useful immediately | Incomplete |
 | 6 | Phase 7: Dialyzer Tracker | Critical dialysis-specific safety workflow | Incomplete |

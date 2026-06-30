@@ -1,16 +1,17 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { CalendarPlus, FileText, Pill, ShieldCheck } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { EmptyAction, EmptyState } from "@/components/common/empty-state";
+import { LoadingState } from "@/components/common/loading-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardTitle } from "@/components/ui/card";
-
-const stats = [
-  { label: "Current weight", value: "-- kg", note: "Add a session to calculate", tone: "neutral" },
-  { label: "Dry weight", value: "-- kg", note: "Set in patient setup", tone: "neutral" },
-  { label: "Dialyzer", value: "Not set", note: "Current usage will show here", tone: "success" },
-] as const;
+import { patientSetupService } from "@/features/patient/services/patient-setup-service";
+import type { Dialyzer, Patient } from "@/types/core";
 
 const quickActions = [
   { href: "/add-session", label: "Add session", icon: CalendarPlus },
@@ -20,6 +21,53 @@ const quickActions = [
 ] as const;
 
 export function DashboardScreen() {
+  const router = useRouter();
+  const [patient, setPatient] = useState<Patient | undefined>();
+  const [activeDialyzer, setActiveDialyzer] = useState<Dialyzer | undefined>();
+  const [loading, setLoading] = useState(true);
+  const [setupComplete, setSetupComplete] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    setSetupComplete(new URLSearchParams(window.location.search).get("setup") === "complete");
+
+    patientSetupService
+      .getSnapshot()
+      .then((snapshot) => {
+        if (cancelled) return;
+
+        if (!snapshot.patient) {
+          router.replace("/patient-setup");
+          return;
+        }
+
+        setPatient(snapshot.patient);
+        setActiveDialyzer(snapshot.activeDialyzer);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
+
+  if (loading || !patient) {
+    return <LoadingState label="Loading dashboard..." />;
+  }
+
+  const stats = [
+    { label: "Patient", value: patient.name, note: patient.uhid ? `UHID ${patient.uhid}` : "One-patient MVP profile" },
+    { label: "Dry weight", value: `${patient.dryWeightKg} kg`, note: patient.dialysisFrequency ?? "Frequency not set" },
+    {
+      label: "Dialyzer",
+      value: activeDialyzer ? activeDialyzer.name : "Not set",
+      note: activeDialyzer ? `Usage ${activeDialyzer.currentUsage} / ${activeDialyzer.maxUsage}` : "Add from patient setup when ready",
+    },
+  ];
+
   return (
     <div className="space-y-5">
       <PageHeader
@@ -31,10 +79,16 @@ export function DashboardScreen() {
             Add session
           </Link>
         }
-        description="Start with patient setup, then use quick session entry after every dialysis visit."
+        description="Use quick session entry after every dialysis visit. DialyCare stores records locally on this device."
         eyebrow="Home"
-        title="Good morning"
+        title={`Good morning, ${patient.name.split(" ")[0] ?? "caregiver"}`}
       />
+
+      {setupComplete ? (
+        <div className="rounded-lg border border-brand-primary/20 bg-brand-mint p-4 text-sm text-brand-primary" role="status">
+          Patient setup is complete. You can start tracking dialysis sessions now.
+        </div>
+      ) : null}
 
       <div className="grid gap-3 sm:grid-cols-3">
         {stats.map((stat) => (
@@ -49,16 +103,16 @@ export function DashboardScreen() {
       <Card>
         <div className="flex items-center justify-between gap-3">
           <CardTitle>Next best action</CardTitle>
-          <Badge tone="success">MVP setup</Badge>
+          <Badge tone="success">Ready</Badge>
         </div>
         <EmptyState
           action={
-            <Link href="/patient-setup">
-              <EmptyAction>Create patient profile</EmptyAction>
+            <Link href="/add-session">
+              <EmptyAction>Add first session</EmptyAction>
             </Link>
           }
-          description="No patient is configured yet. Create the one patient profile before adding dialysis sessions."
-          title="Set up patient once"
+          description="No session summary is available yet. Add the first dialysis session to start building history."
+          title="Start daily tracking"
         />
       </Card>
 
