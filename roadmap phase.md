@@ -175,16 +175,16 @@ Show the caregiver the most important current status at a glance.
 
 | ER Step | Task | Acceptance Criteria | ER Status |
 |---|---|---|---|
-| 5.1 | Build dashboard patient header | Shows greeting, patient name, and last dialysis date | Incomplete |
-| 5.2 | Add current weight card | Shows latest post-HD or latest relevant weight | Incomplete |
-| 5.3 | Add dry weight card | Shows configured dry weight | Incomplete |
-| 5.4 | Add weight difference card | Shows latest pre-HD weight minus dry weight | Incomplete |
-| 5.5 | Add current dialyzer card | Shows active dialyzer name and usage count | Incomplete |
-| 5.6 | Add dialyzer warning state | Warning near max usage and change recommended at max usage | Incomplete |
-| 5.7 | Add next dialysis card | Estimates next session based on frequency or manually configured schedule | Incomplete |
-| 5.8 | Add quick actions | Add Session, Add Report, Add Medicine, Export Backup | Incomplete |
-| 5.9 | Add recent session preview | Shows most recent session summary | Incomplete |
-| 5.10 | Add empty dashboard state | New users see clear next action after setup | Incomplete |
+| 5.1 | Build dashboard patient header | Shows greeting, patient name, and last dialysis date | Complete |
+| 5.2 | Add current weight card | Shows latest post-HD or latest relevant weight | Complete |
+| 5.3 | Add dry weight card | Shows configured dry weight | Complete |
+| 5.4 | Add weight difference card | Shows latest pre-HD weight minus dry weight | Complete |
+| 5.5 | Add current dialyzer card | Shows active dialyzer name and usage count | Complete |
+| 5.6 | Add dialyzer warning state | Warning near max usage and change recommended at max usage | Complete |
+| 5.7 | Add next dialysis card | Estimates next session based on frequency or manually configured schedule | Complete |
+| 5.8 | Add quick actions | Add Session, Add Report, Add Medicine, Export Backup | Complete |
+| 5.9 | Add recent session preview | Shows most recent session summary | Complete |
+| 5.10 | Add empty dashboard state | New users see clear next action after setup | Complete |
 
 ---
 
@@ -397,7 +397,7 @@ The MVP is complete only when all of these are done.
 | Dialyzer | Dialyzer usage increments and warns near limit | Complete |
 | Medicines | Medicine list can be managed and exported | Incomplete |
 | Documents | Reports/booklet images can be uploaded and reviewed locally | Incomplete |
-| Dashboard | Latest patient, weight, dialyzer, and quick actions are visible | Incomplete |
+| Dashboard | Latest patient, weight, dialyzer, and quick actions are visible | Complete |
 | Analytics | Basic trends and summary cards are available | Incomplete |
 | Backup | Full JSON export/import works reliably | Incomplete |
 | PDF | Doctor/monthly PDF export works with disclaimer | Incomplete |
@@ -480,7 +480,7 @@ The MVP is complete only when all of these are done.
 | 4 | Phase 4: Add Dialysis Session | Main MVP workflow and north-star metric | Incomplete |
 | 5 | Phase 6: Session History | Makes entered data useful immediately | Complete |
 | 6 | Phase 7: Dialyzer Tracker | Critical dialysis-specific safety workflow | Complete |
-| 7 | Phase 5: Dashboard | Better once real session/dialyzer data exists | Incomplete |
+| 7 | Phase 5: Dashboard | Better once real session/dialyzer data exists | Complete |
 | 8 | Phase 8: Medicines | Important supporting record area | Incomplete |
 | 9 | Phase 9: Reports & Documents | Replaces paper booklet storage | Incomplete |
 | 10 | Phase 11: Backup & PDF Export | Mandatory before real-world daily use | Incomplete |
