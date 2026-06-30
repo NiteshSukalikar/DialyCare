@@ -7,21 +7,56 @@ import { EmptyAction, EmptyState } from "@/components/common/empty-state";
 import { LoadingState } from "@/components/common/loading-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { PatientRepository } from "@/data/repositories";
 import { sessionEntryService } from "@/features/sessions/services/session-entry-service";
 import { calculateWeightLossKg } from "@/features/sessions/utils/session-calculations";
+import {
+  filterSessions,
+  groupSessionsByMonth,
+  type SessionHistoryFilter,
+} from "@/features/sessions/utils/session-history";
 import type { DialysisSession } from "@/types/core";
+
+const filters: { value: SessionHistoryFilter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "week", label: "This week" },
+  { value: "month", label: "This month" },
+  { value: "last-3-months", label: "Last 3 months" },
+  { value: "custom", label: "Custom date" },
+];
 
 function formatSessionDate(session: DialysisSession) {
   const time = session.sessionTime ? ` at ${session.sessionTime}` : "";
   return `${session.date}${time}`;
 }
 
+function bpLabel(session: DialysisSession) {
+  return `${session.preBpSystolic}/${session.preBpDiastolic} to ${session.postBpSystolic}/${session.postBpDiastolic}`;
+}
+
+function DetailRow({ label, value }: { label: string; value?: string | number }) {
+  if (value === undefined || value === "") return null;
+
+  return (
+    <div>
+      <dt className="text-sm font-medium text-brand-muted">{label}</dt>
+      <dd className="mt-1 text-sm text-brand-ink">{value}</dd>
+    </div>
+  );
+}
+
 export function HistoryScreen() {
   const [sessions, setSessions] = useState<DialysisSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<SessionHistoryFilter>("all");
+  const [customFrom, setCustomFrom] = useState("");
+  const [customTo, setCustomTo] = useState("");
+  const [selectedSession, setSelectedSession] = useState<DialysisSession | null>(null);
+  const [deletingSessionId, setDeletingSessionId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -51,6 +86,26 @@ export function HistoryScreen() {
     };
   }, []);
 
+  const filteredSessions = filterSessions(sessions, activeFilter, new Date(), {
+    from: customFrom || undefined,
+    to: customTo || undefined,
+  });
+  const groupedSessions = groupSessionsByMonth(filteredSessions);
+
+  async function handleDeleteSession(session: DialysisSession) {
+    if (!window.confirm("Delete this dialysis session? This cannot be undone.")) return;
+
+    setDeletingSessionId(session.id);
+    try {
+      await sessionEntryService.deleteSession(session.id);
+      setSessions((current) => current.filter((item) => item.id !== session.id));
+      setSelectedSession(null);
+      setStatusMessage("Dialysis session deleted.");
+    } finally {
+      setDeletingSessionId(null);
+    }
+  }
+
   if (loading) {
     return <LoadingState label="Loading session history..." />;
   }
@@ -77,6 +132,31 @@ export function HistoryScreen() {
         </div>
       ) : null}
 
+      <Card>
+        <div className="flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Session history filters">
+          {filters.map((filter) => (
+            <button
+              aria-selected={activeFilter === filter.value}
+              className={`min-h-10 whitespace-nowrap rounded-full px-3 text-sm font-semibold ${
+                activeFilter === filter.value ? "bg-brand-primary text-brand-mint" : "bg-brand-neutral text-brand-muted"
+              }`}
+              key={filter.value}
+              onClick={() => setActiveFilter(filter.value)}
+              role="tab"
+              type="button"
+            >
+              {filter.label}
+            </button>
+          ))}
+        </div>
+        {activeFilter === "custom" ? (
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <Input label="From date" onChange={(event) => setCustomFrom(event.target.value)} type="date" value={customFrom} />
+            <Input label="To date" onChange={(event) => setCustomTo(event.target.value)} type="date" value={customTo} />
+          </div>
+        ) : null}
+      </Card>
+
       {sessions.length === 0 ? (
         <Card>
           <EmptyState
@@ -89,59 +169,132 @@ export function HistoryScreen() {
             title="No dialysis sessions yet"
           />
         </Card>
+      ) : filteredSessions.length === 0 ? (
+        <Card>
+          <EmptyState
+            description="Try a wider date range or switch back to all sessions."
+            title="No sessions match this filter"
+          />
+        </Card>
       ) : (
-        <div className="space-y-3">
-          {sessions.map((session) => {
-            const weightLossKg = calculateWeightLossKg(session.preWeightKg, session.postWeightKg);
+        <div className="space-y-5">
+          {groupedSessions.map((group) => (
+            <section className="space-y-3" key={group.monthKey}>
+              <h2 className="px-1 text-sm font-semibold uppercase tracking-wide text-brand-muted">{group.label}</h2>
+              {group.sessions.map((session) => {
+                const weightLossKg = calculateWeightLossKg(session.preWeightKg, session.postWeightKg);
 
-            return (
-              <Card key={session.id}>
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <CardTitle>{formatSessionDate(session)}</CardTitle>
-                      <Badge tone="neutral">UF {session.ufRemovedLiters} L</Badge>
-                    </div>
-                    <dl className="mt-3 grid gap-2 text-sm text-brand-muted sm:grid-cols-2">
-                      <div>
-                        <dt className="font-medium text-brand-ink">Weight</dt>
-                        <dd>
-                          {session.preWeightKg} to {session.postWeightKg} kg
-                          {weightLossKg !== undefined ? ` (${weightLossKg} kg loss)` : ""}
-                        </dd>
-                      </div>
-                      <div>
-                        <dt className="font-medium text-brand-ink">BP</dt>
-                        <dd>
-                          {session.preBpSystolic}/{session.preBpDiastolic} to {session.postBpSystolic}/{session.postBpDiastolic}
-                        </dd>
-                      </div>
-                      {session.dialyzerUseNumber !== undefined ? (
-                        <div>
-                          <dt className="font-medium text-brand-ink">Dialyzer use</dt>
-                          <dd>Use #{session.dialyzerUseNumber}</dd>
-                        </div>
-                      ) : null}
-                      {session.remarks ? (
-                        <div>
-                          <dt className="font-medium text-brand-ink">Remarks</dt>
-                          <dd>{session.remarks}</dd>
-                        </div>
-                      ) : null}
-                    </dl>
-                  </div>
-                  <Link
-                    className="inline-flex min-h-11 items-center justify-center rounded-lg bg-brand-mint px-4 py-2.5 text-sm font-semibold text-brand-primary transition hover:bg-[#D3EFE5]"
-                    href={`/add-session?sessionId=${session.id}`}
+                return (
+                  <Card
+                    className="cursor-pointer transition hover:border-brand-primary/40 focus:outline-none focus:ring-4 focus:ring-brand-mint"
+                    key={session.id}
+                    onClick={() => setSelectedSession(session)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        setSelectedSession(session);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
                   >
-                    Edit
-                  </Link>
-                </div>
-              </Card>
-            );
-          })}
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <CardTitle>{formatSessionDate(session)}</CardTitle>
+                          <Badge tone="neutral">UF {session.ufRemovedLiters} L</Badge>
+                        </div>
+                        <dl className="mt-3 grid gap-2 text-sm text-brand-muted sm:grid-cols-2">
+                          <div>
+                            <dt className="font-medium text-brand-ink">Weight</dt>
+                            <dd>
+                              {session.preWeightKg} to {session.postWeightKg} kg
+                              {weightLossKg !== undefined ? ` (${weightLossKg} kg loss)` : ""}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="font-medium text-brand-ink">BP</dt>
+                            <dd>{bpLabel(session)}</dd>
+                          </div>
+                          {session.dialyzerUseNumber !== undefined ? (
+                            <div>
+                              <dt className="font-medium text-brand-ink">Dialyzer use</dt>
+                              <dd>Use #{session.dialyzerUseNumber}</dd>
+                            </div>
+                          ) : null}
+                          {session.remarks ? (
+                            <div>
+                              <dt className="font-medium text-brand-ink">Remarks</dt>
+                              <dd>{session.remarks}</dd>
+                            </div>
+                          ) : null}
+                        </dl>
+                      </div>
+                      <span className="inline-flex min-h-11 items-center justify-center rounded-lg bg-brand-mint px-4 py-2.5 text-sm font-semibold text-brand-primary">
+                        View details
+                      </span>
+                    </div>
+                  </Card>
+                );
+              })}
+            </section>
+          ))}
         </div>
       )}
+
+      {selectedSession ? (
+        <Card className="border-brand-primary/30">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <CardTitle>Session details</CardTitle>
+              <p className="mt-1 text-sm text-brand-muted">{formatSessionDate(selectedSession)}</p>
+            </div>
+            <Button onClick={() => setSelectedSession(null)} type="button" variant="ghost">
+              Close
+            </Button>
+          </div>
+          <dl className="mt-4 grid gap-4 sm:grid-cols-2">
+            <DetailRow label="Pre-HD weight" value={`${selectedSession.preWeightKg} kg`} />
+            <DetailRow label="Post-HD weight" value={`${selectedSession.postWeightKg} kg`} />
+            <DetailRow
+              label="Weight loss"
+              value={
+                calculateWeightLossKg(selectedSession.preWeightKg, selectedSession.postWeightKg) === undefined
+                  ? undefined
+                  : `${calculateWeightLossKg(selectedSession.preWeightKg, selectedSession.postWeightKg)} kg`
+              }
+            />
+            <DetailRow label="Pre-HD BP" value={`${selectedSession.preBpSystolic}/${selectedSession.preBpDiastolic}`} />
+            <DetailRow label="Post-HD BP" value={`${selectedSession.postBpSystolic}/${selectedSession.postBpDiastolic}`} />
+            <DetailRow label="UF removed" value={`${selectedSession.ufRemovedLiters} L`} />
+            <DetailRow label="Dialyzer use" value={selectedSession.dialyzerUseNumber ? `Use #${selectedSession.dialyzerUseNumber}` : undefined} />
+            <DetailRow label="Hospital" value={selectedSession.hospital} />
+            <DetailRow label="Doctor" value={selectedSession.doctor} />
+            <DetailRow label="Complications" value={selectedSession.complications} />
+            <DetailRow label="Injections given" value={selectedSession.injectionsGiven} />
+            <DetailRow label="Medicine changes" value={selectedSession.medicineChanges} />
+            <DetailRow label="Machine notes" value={selectedSession.machineNotes} />
+            <DetailRow label="Remarks" value={selectedSession.remarks} />
+          </dl>
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+            <Link
+              className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg bg-brand-mint px-4 py-2.5 text-sm font-semibold text-brand-primary transition hover:bg-[#D3EFE5]"
+              href={`/add-session?sessionId=${selectedSession.id}`}
+            >
+              Edit session
+            </Link>
+            <Button
+              className="flex-1"
+              disabled={deletingSessionId === selectedSession.id}
+              onClick={() => handleDeleteSession(selectedSession)}
+              type="button"
+              variant="danger"
+            >
+              {deletingSessionId === selectedSession.id ? "Deleting..." : "Delete session"}
+            </Button>
+          </div>
+        </Card>
+      ) : null}
     </div>
   );
 }

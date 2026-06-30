@@ -198,15 +198,15 @@ Make past dialysis records easy to review, search visually, and open in detail.
 
 | ER Step | Task | Acceptance Criteria | ER Status |
 |---|---|---|---|
-| 6.1 | Build session history screen | Lists all saved dialysis sessions | Incomplete |
-| 6.2 | Add timeline-style session cards | Cards show date, weight change, UF, BP, dialyzer use, remarks | Incomplete |
-| 6.3 | Add monthly grouping | Sessions are grouped by month | Incomplete |
-| 6.4 | Add filters | This week, this month, last 3 months, custom date | Incomplete |
-| 6.5 | Add session detail view | Tapping a card opens full details | Incomplete |
-| 6.6 | Add edit action from detail | Existing session can be updated from detail screen | Incomplete |
-| 6.7 | Add delete action from detail | Existing session can be deleted after confirmation | Incomplete |
-| 6.8 | Add empty filtered state | User sees helpful message if no sessions match filter | Incomplete |
-| 6.9 | Add stable sorting | Newest sessions appear first by default | Incomplete |
+| 6.1 | Build session history screen | Lists all saved dialysis sessions | Complete |
+| 6.2 | Add timeline-style session cards | Cards show date, weight change, UF, BP, dialyzer use, remarks | Complete |
+| 6.3 | Add monthly grouping | Sessions are grouped by month | Complete |
+| 6.4 | Add filters | This week, this month, last 3 months, custom date | Complete |
+| 6.5 | Add session detail view | Tapping a card opens full details | Complete |
+| 6.6 | Add edit action from detail | Existing session can be updated from detail screen | Complete |
+| 6.7 | Add delete action from detail | Existing session can be deleted after confirmation | Complete |
+| 6.8 | Add empty filtered state | User sees helpful message if no sessions match filter | Complete |
+| 6.9 | Add stable sorting | Newest sessions appear first by default | Complete |
 
 ---
 
@@ -393,7 +393,7 @@ The MVP is complete only when all of these are done.
 |---|---|---|
 | Patient setup | One patient can be created, edited, and persisted | Complete |
 | Add session | Dialysis session can be added in under 30 seconds | Complete |
-| History | Past sessions can be reviewed, filtered, opened, edited, and deleted | Incomplete |
+| History | Past sessions can be reviewed, filtered, opened, edited, and deleted | Complete |
 | Dialyzer | Dialyzer usage increments and warns near limit | Incomplete |
 | Medicines | Medicine list can be managed and exported | Incomplete |
 | Documents | Reports/booklet images can be uploaded and reviewed locally | Incomplete |
@@ -478,7 +478,7 @@ The MVP is complete only when all of these are done.
 | 2 | Phase 2: Local Database | Core app depends on durable local data | Complete |
 | 3 | Phase 3: Patient Setup | Required before meaningful tracking | Complete |
 | 4 | Phase 4: Add Dialysis Session | Main MVP workflow and north-star metric | Incomplete |
-| 5 | Phase 6: Session History | Makes entered data useful immediately | Incomplete |
+| 5 | Phase 6: Session History | Makes entered data useful immediately | Complete |
 | 6 | Phase 7: Dialyzer Tracker | Critical dialysis-specific safety workflow | Incomplete |
 | 7 | Phase 5: Dashboard | Better once real session/dialyzer data exists | Incomplete |
 | 8 | Phase 8: Medicines | Important supporting record area | Incomplete |
