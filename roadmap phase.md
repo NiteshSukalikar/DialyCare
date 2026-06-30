@@ -21,10 +21,10 @@ The MVP must help the caregiver:
 | Frontend | React / Next.js or Vite React | Complete |
 | Styling | Tailwind CSS with clean medical theme | Complete |
 | Component style | Simple reusable UI components, ShadCN-style patterns optional | Complete |
-| Local database | IndexedDB via Dexie.js | Incomplete |
+| Local database | IndexedDB via Dexie.js | Complete |
 | Charts | Recharts | Incomplete |
 | Export | JSON backup, PDF summary using jsPDF or pdfmake | Incomplete |
-| Storage model | Offline-first local device storage | Incomplete |
+| Storage model | Offline-first local device storage | Complete |
 | Authentication | No login for MVP | Incomplete |
 | Backend | No backend for MVP | Incomplete |
 
@@ -81,27 +81,27 @@ Create a durable IndexedDB data layer for all MVP entities.
 
 | ER Step | Task | Acceptance Criteria | ER Status |
 |---|---|---|---|
-| 2.1 | Install and configure Dexie.js | IndexedDB database opens and persists records locally | Incomplete |
-| 2.2 | Define Patient entity | Patient profile fields match MVP requirements | Incomplete |
-| 2.3 | Define DialysisSession entity | Session fields include date, time, weights, BP, UF, dialyzer, remarks | Incomplete |
-| 2.4 | Define Dialyzer entity | Dialyzer name, start date, max usage, current usage, status supported | Incomplete |
-| 2.5 | Define Medicine entity | Medicine name, dose, frequency, timing, dates, notes supported | Incomplete |
-| 2.6 | Define Document entity | Document title, category, file type, date, notes, file/blob reference supported | Incomplete |
-| 2.7 | Add database versioning | Future schema changes can be migrated safely | Incomplete |
-| 2.8 | Add repository/service layer | UI reads/writes through typed data functions, not raw Dexie calls everywhere | Incomplete |
-| 2.9 | Add seed/demo data utility | Developer can load sample patient/session data for testing | Incomplete |
-| 2.10 | Add local data validation | Required fields and numeric ranges are validated before save | Incomplete |
+| 2.1 | Install and configure Dexie.js | IndexedDB database opens and persists records locally | Complete |
+| 2.2 | Define Patient entity | Patient profile fields match MVP requirements | Complete |
+| 2.3 | Define DialysisSession entity | Session fields include date, time, weights, BP, UF, dialyzer, remarks | Complete |
+| 2.4 | Define Dialyzer entity | Dialyzer name, start date, max usage, current usage, status supported | Complete |
+| 2.5 | Define Medicine entity | Medicine name, dose, frequency, timing, dates, notes supported | Complete |
+| 2.6 | Define Document entity | Document title, category, file type, date, notes, file/blob reference supported | Complete |
+| 2.7 | Add database versioning | Future schema changes can be migrated safely | Complete |
+| 2.8 | Add repository/service layer | UI reads/writes through typed data functions, not raw Dexie calls everywhere | Complete |
+| 2.9 | Add seed/demo data utility | Developer can load sample patient/session data for testing | Complete |
+| 2.10 | Add local data validation | Required fields and numeric ranges are validated before save | Complete |
 
 ## Core Entities
 
 | Entity | Purpose | ER Status |
 |---|---|---|
-| Patient | Stores one patient profile and dialysis baseline details | Incomplete |
-| DialysisSession | Stores every dialysis session record | Incomplete |
-| Dialyzer | Tracks dialyzer lifecycle and usage count | Incomplete |
-| Medicine | Tracks dialysis-related medicines | Incomplete |
-| Document | Stores booklet photos, prescriptions, reports, bills, and notes | Incomplete |
-| AppSettings | Stores backup reminder settings, theme preferences, and first-run flags | Incomplete |
+| Patient | Stores one patient profile and dialysis baseline details | Complete |
+| DialysisSession | Stores every dialysis session record | Complete |
+| Dialyzer | Tracks dialyzer lifecycle and usage count | Complete |
+| Medicine | Tracks dialysis-related medicines | Complete |
+| Document | Stores booklet photos, prescriptions, reports, bills, and notes | Complete |
+| AppSettings | Stores backup reminder settings, theme preferences, and first-run flags | Complete |
 
 ---
 
@@ -475,7 +475,7 @@ The MVP is complete only when all of these are done.
 | Build Order | Phase | Why It Comes Here | ER Status |
 |---|---|---|---|
 | 1 | Phase 1: Foundation | Needed before feature work | Incomplete |
-| 2 | Phase 2: Local Database | Core app depends on durable local data | Incomplete |
+| 2 | Phase 2: Local Database | Core app depends on durable local data | Complete |
 | 3 | Phase 3: Patient Setup | Required before meaningful tracking | Incomplete |
 | 4 | Phase 4: Add Dialysis Session | Main MVP workflow and north-star metric | Incomplete |
 | 5 | Phase 6: Session History | Makes entered data useful immediately | Incomplete |
