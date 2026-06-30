@@ -10,8 +10,10 @@ import { LoadingState } from "@/components/common/loading-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardTitle } from "@/components/ui/card";
+import { SessionRepository } from "@/data/repositories";
 import { patientSetupService } from "@/features/patient/services/patient-setup-service";
-import type { Dialyzer, Patient } from "@/types/core";
+import { calculateWeightGainVsDryKg } from "@/features/sessions/utils/session-calculations";
+import type { DialysisSession, Dialyzer, Patient } from "@/types/core";
 
 const quickActions = [
   { href: "/add-session", label: "Add session", icon: CalendarPlus },
@@ -24,6 +26,7 @@ export function DashboardScreen() {
   const router = useRouter();
   const [patient, setPatient] = useState<Patient | undefined>();
   const [activeDialyzer, setActiveDialyzer] = useState<Dialyzer | undefined>();
+  const [latestSession, setLatestSession] = useState<DialysisSession | undefined>();
   const [loading, setLoading] = useState(true);
   const [setupComplete, setSetupComplete] = useState(false);
 
@@ -34,7 +37,7 @@ export function DashboardScreen() {
 
     patientSetupService
       .getSnapshot()
-      .then((snapshot) => {
+      .then(async (snapshot) => {
         if (cancelled) return;
 
         if (!snapshot.patient) {
@@ -42,8 +45,12 @@ export function DashboardScreen() {
           return;
         }
 
+        const latest = await new SessionRepository().getLatest(snapshot.patient.id);
+        if (cancelled) return;
+
         setPatient(snapshot.patient);
         setActiveDialyzer(snapshot.activeDialyzer);
+        setLatestSession(latest);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -59,8 +66,22 @@ export function DashboardScreen() {
   }
 
   const stats = [
-    { label: "Patient", value: patient.name, note: patient.uhid ? `UHID ${patient.uhid}` : "One-patient MVP profile" },
+    {
+      label: "Last dialysis",
+      value: latestSession?.date ?? "No sessions",
+      note: latestSession?.sessionTime ? `Session time ${latestSession.sessionTime}` : "Add the latest visit after dialysis",
+    },
+    {
+      label: "Current weight",
+      value: latestSession ? `${latestSession.postWeightKg} kg` : "--",
+      note: latestSession ? "Latest post-HD weight" : "Appears after first session",
+    },
     { label: "Dry weight", value: `${patient.dryWeightKg} kg`, note: patient.dialysisFrequency ?? "Frequency not set" },
+    {
+      label: "Weight gain",
+      value: latestSession ? `${calculateWeightGainVsDryKg(latestSession.preWeightKg, patient.dryWeightKg)} kg` : "--",
+      note: "Latest pre-HD weight minus dry weight",
+    },
     {
       label: "Dialyzer",
       value: activeDialyzer ? activeDialyzer.name : "Not set",
@@ -90,7 +111,7 @@ export function DashboardScreen() {
         </div>
       ) : null}
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {stats.map((stat) => (
           <Card key={stat.label}>
             <p className="text-sm text-brand-muted">{stat.label}</p>
@@ -105,15 +126,32 @@ export function DashboardScreen() {
           <CardTitle>Next best action</CardTitle>
           <Badge tone="success">Ready</Badge>
         </div>
-        <EmptyState
-          action={
-            <Link href="/add-session">
-              <EmptyAction>Add first session</EmptyAction>
-            </Link>
-          }
-          description="No session summary is available yet. Add the first dialysis session to start building history."
-          title="Start daily tracking"
-        />
+        {latestSession ? (
+          <div className="mt-4 grid gap-3 text-sm text-brand-muted sm:grid-cols-3">
+            <p>
+              <span className="block font-medium text-brand-ink">Weight</span>
+              {latestSession.preWeightKg} to {latestSession.postWeightKg} kg
+            </p>
+            <p>
+              <span className="block font-medium text-brand-ink">BP</span>
+              {latestSession.preBpSystolic}/{latestSession.preBpDiastolic} to {latestSession.postBpSystolic}/{latestSession.postBpDiastolic}
+            </p>
+            <p>
+              <span className="block font-medium text-brand-ink">UF removed</span>
+              {latestSession.ufRemovedLiters} L
+            </p>
+          </div>
+        ) : (
+          <EmptyState
+            action={
+              <Link href="/add-session">
+                <EmptyAction>Add first session</EmptyAction>
+              </Link>
+            }
+            description="No session summary is available yet. Add the first dialysis session to start building history."
+            title="Start daily tracking"
+          />
+        )}
       </Card>
 
       <section>

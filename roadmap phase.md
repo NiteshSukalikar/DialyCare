@@ -143,19 +143,19 @@ Build the fastest and most important MVP workflow: adding a dialysis session.
 
 | ER Step | Task | Acceptance Criteria | ER Status |
 |---|---|---|---|
-| 4.1 | Build add session screen | Accessible from dashboard and bottom navigation | Incomplete |
-| 4.2 | Add required fields | Date, session time, pre/post weight, pre/post BP, UF removed, dialyzer, remarks | Incomplete |
-| 4.3 | Add optional fields | Hospital, doctor, complications, injections, medicine changes, machine notes | Incomplete |
-| 4.4 | Add numeric input UX | Large mobile-friendly numeric inputs for weight, BP, and UF | Incomplete |
-| 4.5 | Add smart calculations | Weight loss and weight gain vs dry weight auto-calculate | Incomplete |
-| 4.6 | Auto-increment dialyzer usage | Saving session increments active dialyzer usage count | Incomplete |
-| 4.7 | Add dialyzer usage confirmation | User can confirm or adjust usage number before saving | Incomplete |
-| 4.8 | Add validation rules | Prevent invalid weights, BP values, negative UF, missing date | Incomplete |
-| 4.9 | Add fixed mobile save action | Save button remains easy to reach on mobile | Incomplete |
-| 4.10 | Save session locally | New session persists and appears in history | Incomplete |
-| 4.11 | Update dashboard after save | Latest weight, last dialysis date, and dialyzer usage refresh automatically | Incomplete |
-| 4.12 | Add edit session | User can correct mistakes in previous entries | Incomplete |
-| 4.13 | Add delete session with confirmation | User can remove an incorrect entry after explicit confirmation | Incomplete |
+| 4.1 | Build add session screen | Accessible from dashboard and bottom navigation | Complete |
+| 4.2 | Add required fields | Date, session time, pre/post weight, pre/post BP, UF removed, dialyzer, remarks | Complete |
+| 4.3 | Add optional fields | Hospital, doctor, complications, injections, medicine changes, machine notes | Complete |
+| 4.4 | Add numeric input UX | Large mobile-friendly numeric inputs for weight, BP, and UF | Complete |
+| 4.5 | Add smart calculations | Weight loss and weight gain vs dry weight auto-calculate | Complete |
+| 4.6 | Auto-increment dialyzer usage | Saving session increments active dialyzer usage count | Complete |
+| 4.7 | Add dialyzer usage confirmation | User can confirm or adjust usage number before saving | Complete |
+| 4.8 | Add validation rules | Prevent invalid weights, BP values, negative UF, missing date | Complete |
+| 4.9 | Add fixed mobile save action | Save button remains easy to reach on mobile | Complete |
+| 4.10 | Save session locally | New session persists and appears in history | Complete |
+| 4.11 | Update dashboard after save | Latest weight, last dialysis date, and dialyzer usage refresh automatically | Complete |
+| 4.12 | Add edit session | User can correct mistakes in previous entries | Complete |
+| 4.13 | Add delete session with confirmation | User can remove an incorrect entry after explicit confirmation | Complete |
 
 ## Success Metric
 
@@ -392,7 +392,7 @@ The MVP is complete only when all of these are done.
 | Area | Completion Requirement | ER Status |
 |---|---|---|
 | Patient setup | One patient can be created, edited, and persisted | Complete |
-| Add session | Dialysis session can be added in under 30 seconds | Incomplete |
+| Add session | Dialysis session can be added in under 30 seconds | Complete |
 | History | Past sessions can be reviewed, filtered, opened, edited, and deleted | Incomplete |
 | Dialyzer | Dialyzer usage increments and warns near limit | Incomplete |
 | Medicines | Medicine list can be managed and exported | Incomplete |

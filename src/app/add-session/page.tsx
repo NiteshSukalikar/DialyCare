@@ -1,5 +1,12 @@
+import { Suspense } from "react";
+
 import { AddSessionScreen } from "@/features/sessions/screens/add-session-screen";
+import { LoadingState } from "@/components/common/loading-state";
 
 export default function AddSessionPage() {
-  return <AddSessionScreen />;
+  return (
+    <Suspense fallback={<LoadingState label="Loading session form..." />}>
+      <AddSessionScreen />
+    </Suspense>
+  );
 }

@@ -11,7 +11,12 @@ export class SessionRepository {
   constructor(private readonly database: DialyCareDatabase = defaultDb) {}
 
   async listByPatient(patientId: string) {
-    return this.database.sessions.where("patientId").equals(patientId).reverse().sortBy("date");
+    const sessions = await this.database.sessions.where("patientId").equals(patientId).toArray();
+    return sessions.sort((a, b) => {
+      const aKey = `${a.date}T${a.sessionTime ?? "00:00"}`;
+      const bKey = `${b.date}T${b.sessionTime ?? "00:00"}`;
+      return bKey.localeCompare(aKey);
+    });
   }
 
   async get(id: string) {
@@ -53,7 +58,24 @@ export class SessionRepository {
 
     const updated = withUpdatedAt({ ...existing, ...input });
     assertValid(validateDialysisSession(updated));
-    await this.database.sessions.put(updated);
+
+    await this.database.transaction("rw", this.database.sessions, this.database.dialyzers, async () => {
+      await this.database.sessions.put(updated);
+
+      if (updated.dialyzerId) {
+        const dialyzer = await this.database.dialyzers.get(updated.dialyzerId);
+        if (dialyzer) {
+          await this.database.dialyzers.put(
+            withUpdatedAt({
+              ...dialyzer,
+              currentUsage: Math.max(dialyzer.currentUsage, updated.dialyzerUseNumber ?? dialyzer.currentUsage),
+              lastUsedDate: updated.date,
+            }),
+          );
+        }
+      }
+    });
+
     return updated;
   }
 

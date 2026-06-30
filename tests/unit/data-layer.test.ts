@@ -4,6 +4,11 @@ import { DialyCareDatabase } from "@/data/db/dialycare-db";
 import { buildDemoDialyzer, buildDemoSessions, demoPatient } from "@/data/seed/demo-data";
 import { DialyzerRepository, PatientRepository, SessionRepository } from "@/data/repositories";
 import { validateDialysisSession, validatePatient } from "@/data/validation/core-validation";
+import {
+  calculateWeightGainVsDryKg,
+  calculateWeightLossKg,
+  nextDialyzerUseNumber,
+} from "@/features/sessions/utils/session-calculations";
 import type { CreateSessionInput } from "@/data/repositories";
 
 function createTestDb() {
@@ -27,6 +32,14 @@ describe("core validation", () => {
 
     expect(validateDialysisSession(validSession).valid).toBe(true);
     expect(validateDialysisSession({ ...validSession, postWeightKg: 70, ufRemovedLiters: -1 }).valid).toBe(false);
+  });
+});
+
+describe("session calculations", () => {
+  it("calculates weight loss, dry-weight gain, and next dialyzer usage", () => {
+    expect(calculateWeightLossKg(62.4, 58.5)).toBe(3.9);
+    expect(calculateWeightGainVsDryKg(62.4, 57)).toBe(5.4);
+    expect(nextDialyzerUseNumber(7)).toBe(8);
   });
 });
 
@@ -64,6 +77,29 @@ describe("repository data flow", () => {
 
     await reopened.delete();
     reopened.close();
+  });
+
+  it("lists newest sessions first and refreshes dialyzer usage on edit", async () => {
+    database = createTestDb();
+    const patients = new PatientRepository(database);
+    const dialyzers = new DialyzerRepository(database);
+    const sessions = new SessionRepository(database);
+
+    const patient = await patients.create(demoPatient);
+    const dialyzer = await dialyzers.create(buildDemoDialyzer(patient.id));
+    const sessionInput = firstSession(patient.id, dialyzer.id);
+
+    const older = await sessions.create({ ...sessionInput, date: "2026-06-20", dialyzerUseNumber: 4 });
+    const newer = await sessions.create({ ...sessionInput, date: "2026-06-22", dialyzerUseNumber: 5 });
+    const ordered = await sessions.listByPatient(patient.id);
+
+    expect(ordered.map((session) => session.id)).toEqual([newer.id, older.id]);
+
+    await sessions.update(older.id, { dialyzerUseNumber: 6, date: "2026-06-23" });
+    const updatedDialyzer = await dialyzers.get(dialyzer.id);
+
+    expect(updatedDialyzer?.currentUsage).toBe(6);
+    expect(updatedDialyzer?.lastUsedDate).toBe("2026-06-23");
   });
 
   it("keeps UI-facing code behind typed repositories", async () => {
