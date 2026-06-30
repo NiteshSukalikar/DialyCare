@@ -1,0 +1,141 @@
+<h2 class="sr-only">DialyCare app screens preview: patient setup, dashboard, add session, and session history, with a light and dark theme toggle</h2>
+<style>
+#dc-wrap[data-theme="light"]{--mbg:#FBF7F0;--mcard:#FFFFFF;--malt:#F1EFE8;--mtext:#1F2A27;--msub:#5F6B66;--mprimary:#0F6E56;--mprimarybg:#E1F5EE;--maccent:#D85A30;--maccentbg:#FAECE7;--mborder:#E5E2D8;--mphone:#FFFFFF;}
+#dc-wrap[data-theme="dark"]{--mbg:#0B1F1A;--mcard:#14302A;--malt:#1B3B33;--mtext:#E7F5EF;--msub:#9FC4B8;--mprimary:#5DCAA5;--mprimarybg:#1B3B33;--maccent:#F0997B;--maccentbg:#3A241B;--mborder:#234740;--mphone:#0E251F;}
+.dc-screen{display:none;}
+.dc-screen.active{display:block;}
+.dc-tab.active{background:var(--mock-tab-active,#0F6E56);color:#fff;}
+</style>
+
+<div id="dc-wrap" data-theme="light" style="background:var(--surface-1); border-radius:16px; padding:1.25rem;">
+
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+  <div style="display:flex; gap:6px;" id="dc-tabs">
+    <button class="dc-tab active" data-screen="1" style="border:0.5px solid var(--border-strong); border-radius:8px; padding:6px 10px; font-size:12px; background:#0F6E56; color:#fff;">1 Setup</button>
+    <button class="dc-tab" data-screen="2" style="border:0.5px solid var(--border-strong); border-radius:8px; padding:6px 10px; font-size:12px; background:var(--surface-2);">2 Dashboard</button>
+    <button class="dc-tab" data-screen="3" style="border:0.5px solid var(--border-strong); border-radius:8px; padding:6px 10px; font-size:12px; background:var(--surface-2);">3 Add session</button>
+    <button class="dc-tab" data-screen="4" style="border:0.5px solid var(--border-strong); border-radius:8px; padding:6px 10px; font-size:12px; background:var(--surface-2);">4 History</button>
+  </div>
+  <div style="display:flex; gap:6px;">
+    <button id="dc-theme-light" style="border:0.5px solid var(--border-strong); border-radius:8px; padding:6px 10px; font-size:12px; display:flex; align-items:center; gap:4px;"><i class="ti ti-sun" style="font-size:14px;" aria-hidden="true"></i>Light</button>
+    <button id="dc-theme-dark" style="border:0.5px solid var(--border-strong); border-radius:8px; padding:6px 10px; font-size:12px; display:flex; align-items:center; gap:4px;"><i class="ti ti-moon" style="font-size:14px;" aria-hidden="true"></i>Dark</button>
+  </div>
+</div>
+
+<div style="display:flex; justify-content:center;">
+<div style="width:340px; background:var(--mphone); border-radius:24px; padding:14px; border:0.5px solid var(--mborder);">
+
+  <div class="dc-screen active" id="dc-s1" style="background:var(--mbg); border-radius:16px; padding:16px;">
+    <div style="font-size:15px; font-weight:500; color:var(--mtext); margin-bottom:2px;">Patient setup</div>
+    <div style="font-size:12px; color:var(--msub); margin-bottom:14px;">Step 1 of 1 — takes under 2 minutes</div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div><div style="font-size:11px; color:var(--msub); margin-bottom:4px;">Patient name</div><div style="background:var(--mcard); border:0.5px solid var(--mborder); border-radius:10px; padding:10px 12px; font-size:14px; color:var(--mtext);">Nitinkumar Sukalikar</div></div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div><div style="font-size:11px; color:var(--msub); margin-bottom:4px;">Age</div><div style="background:var(--mcard); border:0.5px solid var(--mborder); border-radius:10px; padding:10px 12px; font-size:14px; color:var(--mtext);">62</div></div>
+        <div><div style="font-size:11px; color:var(--msub); margin-bottom:4px;">Gender</div><div style="background:var(--mcard); border:0.5px solid var(--mborder); border-radius:10px; padding:10px 12px; font-size:14px; color:var(--mtext);">Male</div></div>
+      </div>
+      <div><div style="font-size:11px; color:var(--msub); margin-bottom:4px;">Hospital</div><div style="background:var(--mcard); border:0.5px solid var(--mborder); border-radius:10px; padding:10px 12px; font-size:14px; color:var(--mtext);">Apollo Hospitals</div></div>
+      <div><div style="font-size:11px; color:var(--msub); margin-bottom:4px;">Dry weight (kg)</div><div style="background:var(--mcard); border:0.5px solid var(--mborder); border-radius:10px; padding:10px 12px; font-size:14px; color:var(--mtext);">57.0</div></div>
+      <div><div style="font-size:11px; color:var(--msub); margin-bottom:4px;">Dialysis frequency</div><div style="background:var(--mcard); border:0.5px solid var(--mborder); border-radius:10px; padding:10px 12px; font-size:14px; color:var(--mtext);">3 times per week</div></div>
+    </div>
+    <button style="width:100%; margin-top:16px; background:var(--mprimary); color:var(--mbg); border:none; border-radius:10px; padding:12px; font-size:14px; font-weight:500;">Save patient</button>
+  </div>
+
+  <div class="dc-screen" id="dc-s2" style="background:var(--mbg); border-radius:16px; padding:16px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+      <div>
+        <div style="font-size:14px; font-weight:500; color:var(--mtext);">Good morning, Nitesh</div>
+        <div style="font-size:11px; color:var(--msub);">Last dialysis: 22 Jun 2026</div>
+      </div>
+      <div style="width:32px; height:32px; border-radius:50%; background:var(--mprimary); display:flex; align-items:center; justify-content:center;"><i class="ti ti-user" style="color:var(--mbg); font-size:16px;" aria-hidden="true"></i></div>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+      <div style="background:var(--mcard); border-radius:10px; padding:10px;">
+        <div style="font-size:11px; color:var(--msub);">Current weight</div>
+        <div style="font-size:17px; font-weight:500; color:var(--mtext);">58.5 kg</div>
+        <div style="font-size:10px; color:var(--maccent);">+1.5 kg vs dry</div>
+      </div>
+      <div style="background:var(--mcard); border-radius:10px; padding:10px;">
+        <div style="font-size:11px; color:var(--msub);">Dialyzer F8HPS</div>
+        <div style="font-size:17px; font-weight:500; color:var(--mtext);">7 / 12</div>
+        <div style="font-size:10px; color:var(--mprimary);">Active</div>
+      </div>
+    </div>
+    <div style="background:var(--mcard); border-radius:10px; padding:10px; margin-bottom:12px;">
+      <div style="font-size:11px; color:var(--msub);">Next dialysis</div>
+      <div style="font-size:15px; font-weight:500; color:var(--mtext);">Tomorrow, 9:00 AM</div>
+    </div>
+    <div style="font-size:11px; color:var(--msub); margin-bottom:6px;">Quick actions</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+      <button style="background:var(--mprimarybg); color:var(--mprimary); border:none; border-radius:10px; padding:10px; font-size:12px; font-weight:500;"><i class="ti ti-plus" style="font-size:13px; vertical-align:-2px;" aria-hidden="true"></i> Add session</button>
+      <button style="background:var(--malt); color:var(--mtext); border:none; border-radius:10px; padding:10px; font-size:12px; font-weight:500;"><i class="ti ti-file-text" style="font-size:13px; vertical-align:-2px;" aria-hidden="true"></i> Add report</button>
+    </div>
+  </div>
+
+  <div class="dc-screen" id="dc-s3" style="background:var(--mbg); border-radius:16px; padding:16px;">
+    <div style="font-size:15px; font-weight:500; color:var(--mtext); margin-bottom:12px;">Add dialysis session</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+      <div><div style="font-size:11px; color:var(--msub); margin-bottom:4px;">Pre-HD weight</div><div style="background:var(--mcard); border:0.5px solid var(--mborder); border-radius:10px; padding:10px; font-size:16px; color:var(--mtext);">62.4 kg</div></div>
+      <div><div style="font-size:11px; color:var(--msub); margin-bottom:4px;">Post-HD weight</div><div style="background:var(--mcard); border:0.5px solid var(--mborder); border-radius:10px; padding:10px; font-size:16px; color:var(--mtext);">58.5 kg</div></div>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+      <div><div style="font-size:11px; color:var(--msub); margin-bottom:4px;">Pre-HD BP</div><div style="background:var(--mcard); border:0.5px solid var(--mborder); border-radius:10px; padding:10px; font-size:16px; color:var(--mtext);">160/90</div></div>
+      <div><div style="font-size:11px; color:var(--msub); margin-bottom:4px;">Post-HD BP</div><div style="background:var(--mcard); border:0.5px solid var(--mborder); border-radius:10px; padding:10px; font-size:16px; color:var(--mtext);">130/80</div></div>
+    </div>
+    <div style="background:var(--mprimarybg); border-radius:10px; padding:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+      <span style="font-size:12px; color:var(--mprimary);">Weight loss (auto)</span>
+      <span style="font-size:15px; font-weight:500; color:var(--mprimary);">3.9 kg</span>
+    </div>
+    <div><div style="font-size:11px; color:var(--msub); margin-bottom:4px;">Remarks</div><div style="background:var(--mcard); border:0.5px solid var(--mborder); border-radius:10px; padding:10px; font-size:13px; color:var(--mtext);">Stable, no cramps</div></div>
+    <button style="width:100%; margin-top:14px; background:var(--mprimary); color:var(--mbg); border:none; border-radius:10px; padding:12px; font-size:14px; font-weight:500;">Save session</button>
+  </div>
+
+  <div class="dc-screen" id="dc-s4" style="background:var(--mbg); border-radius:16px; padding:16px;">
+    <div style="font-size:15px; font-weight:500; color:var(--mtext); margin-bottom:10px;">Session history</div>
+    <div style="display:flex; gap:6px; margin-bottom:12px; overflow-x:auto;">
+      <span style="background:var(--mprimary); color:var(--mbg); font-size:11px; padding:5px 10px; border-radius:14px;">This week</span>
+      <span style="background:var(--mcard); color:var(--msub); font-size:11px; padding:5px 10px; border-radius:14px;">This month</span>
+      <span style="background:var(--mcard); color:var(--msub); font-size:11px; padding:5px 10px; border-radius:14px;">3 months</span>
+    </div>
+    <div style="background:var(--mcard); border-radius:10px; padding:12px; margin-bottom:8px; border-left:3px solid var(--mprimary);">
+      <div style="font-size:12px; color:var(--msub); margin-bottom:6px;">22 Jun 2026</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:12px; color:var(--mtext);">
+        <div>Weight: 62.4 to 58.5 kg</div>
+        <div>UF removed: 3.9 L</div>
+        <div>BP: 160/90 to 130/80</div>
+        <div>Dialyzer: F8HPS #7</div>
+      </div>
+      <div style="font-size:11px; color:var(--mprimary); margin-top:6px;">Remark: Stable</div>
+    </div>
+    <div style="background:var(--mcard); border-radius:10px; padding:12px; border-left:3px solid var(--maccent);">
+      <div style="font-size:12px; color:var(--msub); margin-bottom:6px;">19 Jun 2026</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:12px; color:var(--mtext);">
+        <div>Weight: 61.8 to 58.0 kg</div>
+        <div>UF removed: 3.8 L</div>
+        <div>BP: 168/94 to 138/86</div>
+        <div>Dialyzer: F8HPS #6</div>
+      </div>
+      <div style="font-size:11px; color:var(--maccent); margin-top:6px;">Remark: Mild cramps post session</div>
+    </div>
+  </div>
+
+</div>
+</div>
+</div>
+
+<script>
+(function(){
+  var wrap = document.getElementById('dc-wrap');
+  var tabs = document.querySelectorAll('.dc-tab');
+  tabs.forEach(function(t){
+    t.addEventListener('click', function(){
+      tabs.forEach(function(x){ x.classList.remove('active'); x.style.background='var(--surface-2)'; x.style.color='var(--text-primary)'; });
+      t.classList.add('active'); t.style.background='#0F6E56'; t.style.color='#fff';
+      document.querySelectorAll('.dc-screen').forEach(function(s){ s.classList.remove('active'); });
+      document.getElementById('dc-s'+t.dataset.screen).classList.add('active');
+    });
+  });
+  document.getElementById('dc-theme-light').addEventListener('click', function(){ wrap.setAttribute('data-theme','light'); });
+  document.getElementById('dc-theme-dark').addEventListener('click', function(){ wrap.setAttribute('data-theme','dark'); });
+})();
+</script>
