@@ -241,18 +241,18 @@ Track dialysis-related medicines in a simple list.
 
 | ER Step | Task | Acceptance Criteria | ER Status |
 |---|---|---|---|
-| 8.1 | Build medicine list screen | Shows active and past medicines | Incomplete |
-| 8.2 | Add medicine form | Name, dosage, frequency, timing, start/end date, instructions, doctor notes | Incomplete |
-| 8.3 | Add active/inactive status | Medicines can be marked active or stopped | Incomplete |
-| 8.4 | Add edit medicine | Existing medicine can be updated | Incomplete |
-| 8.5 | Add delete medicine | Medicine can be deleted after confirmation | Incomplete |
+| 8.1 | Build medicine list screen | Shows active and past medicines | Complete |
+| 8.2 | Add medicine form | Name, dosage, frequency, timing, start/end date, instructions, doctor notes | Complete |
+| 8.3 | Add active/inactive status | Medicines can be marked active or stopped | Complete |
+| 8.4 | Add edit medicine | Existing medicine can be updated | Complete |
+| 8.5 | Add delete medicine | Medicine can be deleted after confirmation | Complete |
 | 8.6 | Show medicines in export | Active medicines appear in doctor summary PDF | Incomplete |
 
 ## MVP Constraint
 
 | Constraint | Reason | ER Status |
 |---|---|---|
-| No reminders in MVP | Keeps first release simple and avoids notification complexity | Incomplete |
+| No reminders in MVP | Keeps first release simple and avoids notification complexity | Complete |
 
 ---
 
