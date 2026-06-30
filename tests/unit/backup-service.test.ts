@@ -1,0 +1,93 @@
+import { afterEach, describe, expect, it } from "vitest";
+
+import { DialyCareDatabase } from "@/data/db/dialycare-db";
+import { DialyzerRepository, DocumentRepository, MedicineRepository, PatientRepository, SessionRepository, SettingsRepository } from "@/data/repositories";
+import { buildDemoDialyzer, buildDemoSessions, demoPatient } from "@/data/seed/demo-data";
+import { BackupService } from "@/features/backup/services/backup-service";
+
+function createTestDb(name = `dialycare_backup_test_${crypto.randomUUID()}`) {
+  return new DialyCareDatabase(name);
+}
+
+describe("backup service", () => {
+  let databases: DialyCareDatabase[] = [];
+
+  afterEach(async () => {
+    await Promise.all(
+      databases.map(async (database) => {
+        await database.delete();
+        database.close();
+      }),
+    );
+    databases = [];
+  });
+
+  it("exports and restores core MVP records into a fresh database", async () => {
+    const sourceDb = createTestDb();
+    const targetDb = createTestDb();
+    databases.push(sourceDb, targetDb);
+
+    const patients = new PatientRepository(sourceDb);
+    const dialyzers = new DialyzerRepository(sourceDb);
+    const sessions = new SessionRepository(sourceDb);
+    const medicines = new MedicineRepository(sourceDb);
+    const documents = new DocumentRepository(sourceDb);
+    const settings = new SettingsRepository(sourceDb);
+
+    const patient = await patients.create(demoPatient);
+    const dialyzer = await dialyzers.create(buildDemoDialyzer(patient.id));
+    const [sessionInput] = buildDemoSessions(patient.id, dialyzer.id);
+    if (!sessionInput) throw new Error("Demo session fixture is missing.");
+
+    await sessions.create(sessionInput);
+    await medicines.create({
+      patientId: patient.id,
+      name: "Calcium tablet",
+      dosage: "500 mg",
+      frequency: "Morning",
+      status: "active",
+    });
+    await documents.create({
+      patientId: patient.id,
+      title: "June booklet",
+      category: "dialysis-booklet",
+      fileType: "image",
+      fileName: "booklet.jpg",
+      mimeType: "image/jpeg",
+      date: "2026-06-22",
+      notes: "Stored metadata is included in JSON backup.",
+    });
+    await settings.update({ backupReminderEnabled: true, backupReminderDays: 3 });
+
+    const sourceService = new BackupService(sourceDb);
+    const targetService = new BackupService(targetDb);
+    const json = await sourceService.exportBackupJson();
+    const backup = targetService.parseBackupJson(json);
+    const result = await targetService.restoreBackup(backup);
+
+    expect(result).toMatchObject({
+      patients: 1,
+      sessions: 1,
+      dialyzers: 1,
+      medicines: 1,
+      documents: 1,
+      settings: 1,
+    });
+
+    const restoredSnapshot = await targetService.getSnapshot();
+    expect(restoredSnapshot.patient?.name).toBe(demoPatient.name);
+    expect(restoredSnapshot.sessions[0]?.preWeightKg).toBe(sessionInput.preWeightKg);
+    expect(restoredSnapshot.medicines[0]?.name).toBe("Calcium tablet");
+    expect(restoredSnapshot.documents[0]?.title).toBe("June booklet");
+    expect(restoredSnapshot.settings[0]?.backupReminderDays).toBe(3);
+  });
+
+  it("rejects invalid backup files before restore", () => {
+    const database = createTestDb();
+    databases.push(database);
+    const service = new BackupService(database);
+
+    expect(() => service.parseBackupJson("not-json")).toThrow("Backup file is not valid JSON.");
+    expect(() => service.parseBackupJson(JSON.stringify({ appName: "OtherApp" }))).toThrow("This does not look like a DialyCare backup.");
+  });
+});

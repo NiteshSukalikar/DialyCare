@@ -23,7 +23,7 @@ The MVP must help the caregiver:
 | Component style | Simple reusable UI components, ShadCN-style patterns optional | Complete |
 | Local database | IndexedDB via Dexie.js | Complete |
 | Charts | Recharts | Incomplete |
-| Export | JSON backup, PDF summary using jsPDF or pdfmake | Incomplete |
+| Export | JSON backup, PDF summary using jsPDF or pdfmake | Complete |
 | Storage model | Offline-first local device storage | Complete |
 | Authentication | No login for MVP | Incomplete |
 | Backend | No backend for MVP | Incomplete |
@@ -35,7 +35,7 @@ The MVP must help the caregiver:
 | Build a digital dialysis booklet first | Focus on repeated dialysis record entry and review | Incomplete |
 | Keep one-patient flow | Avoid multi-patient complexity in MVP | Incomplete |
 | Keep offline-first | Data should work without internet | Incomplete |
-| Add backup from day one | Export/import must be treated as a safety feature | Incomplete |
+| Add backup from day one | Export/import must be treated as a safety feature | Complete |
 | Avoid diagnosis | App must not provide medical decisions or treatment advice | Incomplete |
 | Avoid AI in MVP | OCR, AI summaries, and abnormal trend explanations come later | Incomplete |
 | Avoid clinic SaaS features | No staff roles, billing, audit trail, cloud sync, or clinic dashboard in MVP | Incomplete |
@@ -246,7 +246,7 @@ Track dialysis-related medicines in a simple list.
 | 8.3 | Add active/inactive status | Medicines can be marked active or stopped | Complete |
 | 8.4 | Add edit medicine | Existing medicine can be updated | Complete |
 | 8.5 | Add delete medicine | Medicine can be deleted after confirmation | Complete |
-| 8.6 | Show medicines in export | Active medicines appear in doctor summary PDF | Incomplete |
+| 8.6 | Show medicines in export | Active medicines appear in doctor summary PDF | Complete |
 
 ## MVP Constraint
 
@@ -322,23 +322,23 @@ Protect local data and make records shareable with doctors.
 
 | ER Step | Task | Acceptance Criteria | ER Status |
 |---|---|---|---|
-| 11.1 | Build backup/export screen | User sees JSON backup, import, and PDF export options | Incomplete |
-| 11.2 | Export full JSON backup | Patient, sessions, dialyzers, medicines, documents metadata, settings included | Incomplete |
-| 11.3 | Import JSON backup | Valid backup restores data locally | Incomplete |
-| 11.4 | Add import validation | Invalid backup files are rejected safely with clear error | Incomplete |
-| 11.5 | Add overwrite confirmation | User confirms before import replaces existing data | Incomplete |
-| 11.6 | Export monthly PDF summary | User can generate PDF for selected month | Incomplete |
-| 11.7 | Export doctor summary PDF | PDF includes patient info, session table, BP/weight trend, dialyzer usage, medicines, report index | Incomplete |
-| 11.8 | Add safety disclaimer to PDFs | PDF states app is record tracking only, not medical advice | Incomplete |
-| 11.9 | Add manual backup reminder setting | User can configure visible reminder to export backup periodically | Incomplete |
-| 11.10 | Test restore flow | Exported backup can be imported into fresh browser data successfully | Incomplete |
+| 11.1 | Build backup/export screen | User sees JSON backup, import, and PDF export options | Complete |
+| 11.2 | Export full JSON backup | Patient, sessions, dialyzers, medicines, documents metadata, settings included | Complete |
+| 11.3 | Import JSON backup | Valid backup restores data locally | Complete |
+| 11.4 | Add import validation | Invalid backup files are rejected safely with clear error | Complete |
+| 11.5 | Add overwrite confirmation | User confirms before import replaces existing data | Complete |
+| 11.6 | Export monthly PDF summary | User can generate PDF for selected month | Complete |
+| 11.7 | Export doctor summary PDF | PDF includes patient info, session table, BP/weight trend, dialyzer usage, medicines, report index | Complete |
+| 11.8 | Add safety disclaimer to PDFs | PDF states app is record tracking only, not medical advice | Complete |
+| 11.9 | Add manual backup reminder setting | User can configure visible reminder to export backup periodically | Complete |
+| 11.10 | Test restore flow | Exported backup can be imported into fresh browser data successfully | Complete |
 
 ## Mandatory MVP Safety Feature
 
 | Safety Feature | Reason | ER Status |
 |---|---|---|
-| JSON backup and import | Prevents total data loss if browser storage is cleared | Incomplete |
-| PDF summary | Makes doctor sharing possible without app access | Incomplete |
+| JSON backup and import | Prevents total data loss if browser storage is cleared | Complete |
+| PDF summary | Makes doctor sharing possible without app access | Complete |
 
 ---
 
@@ -395,12 +395,12 @@ The MVP is complete only when all of these are done.
 | Add session | Dialysis session can be added in under 30 seconds | Complete |
 | History | Past sessions can be reviewed, filtered, opened, edited, and deleted | Complete |
 | Dialyzer | Dialyzer usage increments and warns near limit | Complete |
-| Medicines | Medicine list can be managed and exported | Incomplete |
+| Medicines | Medicine list can be managed and exported | Complete |
 | Documents | Reports/booklet images can be uploaded and reviewed locally | Complete |
 | Dashboard | Latest patient, weight, dialyzer, and quick actions are visible | Complete |
 | Analytics | Basic trends and summary cards are available | Incomplete |
-| Backup | Full JSON export/import works reliably | Incomplete |
-| PDF | Doctor/monthly PDF export works with disclaimer | Incomplete |
+| Backup | Full JSON export/import works reliably | Complete |
+| PDF | Doctor/monthly PDF export works with disclaimer | Complete |
 | PWA | App is installable and works offline after first load | Incomplete |
 | Safety | App clearly states it is not medical advice | Incomplete |
 
@@ -483,7 +483,7 @@ The MVP is complete only when all of these are done.
 | 7 | Phase 5: Dashboard | Better once real session/dialyzer data exists | Complete |
 | 8 | Phase 8: Medicines | Important supporting record area | Incomplete |
 | 9 | Phase 9: Reports & Documents | Replaces paper booklet storage | Complete |
-| 10 | Phase 11: Backup & PDF Export | Mandatory before real-world daily use | Incomplete |
+| 10 | Phase 11: Backup & PDF Export | Mandatory before real-world daily use | Complete |
 | 11 | Phase 10: Analytics & Trends | Useful after enough session data exists | Incomplete |
 | 12 | Phase 12: PWA Readiness | Install/offline hardening for actual phone use | Incomplete |
 | 13 | Phase 13: QA & Release | Stabilize before calling MVP complete | Incomplete |
