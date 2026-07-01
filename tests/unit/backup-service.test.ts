@@ -116,6 +116,7 @@ describe("backup service", () => {
     const restoredDocument = restoredSnapshot.documents[0];
     expect(restoredDocument?.title).toBe("Booklet page with file");
     expect(restoredDocument?.fileBlob).toBeInstanceOf(Blob);
+    expect(restoredDocument?.fileBlob?.type).toBe("image/jpeg");
     await expect(restoredDocument?.fileBlob?.text()).resolves.toBe("booklet image bytes");
   });
 

@@ -242,7 +242,7 @@ export function BackupScreen() {
         </div>
       ) : null}
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <section className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
         <Card>
           <div className="flex items-start gap-3">
             <span className="rounded-lg bg-brand-mint p-2 text-brand-primary">

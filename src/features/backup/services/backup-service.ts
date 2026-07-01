@@ -225,7 +225,8 @@ export class BackupService {
       if (!document.backupFilePath) continue;
       const zippedFile = preview.zip.file(document.backupFilePath);
       if (!zippedFile) continue;
-      const blob = await zippedFile.async("blob");
+      const arrayBuffer = await zippedFile.async("arraybuffer");
+      const blob = new Blob([arrayBuffer], { type: document.mimeType || "application/octet-stream" });
       filesByDocumentId.set(document.id, blob);
     }
 
