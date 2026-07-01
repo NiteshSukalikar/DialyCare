@@ -1,5 +1,7 @@
 import type { DialysisSession } from "@/types/core";
 
+import { getSessionWeightLossKg } from "./session-calculations";
+
 export type SessionHistoryFilter =
   | "all"
   | "week"
@@ -70,6 +72,7 @@ export function matchesSessionSearch(session: DialysisSession, query: string) {
     session.machineNotes,
     session.remarks,
     session.ufRemovedLiters.toString(),
+    getSessionWeightLossKg(session)?.toString(),
     `${session.preBpSystolic}/${session.preBpDiastolic}`,
     `${session.postBpSystolic}/${session.postBpDiastolic}`,
     session.dialyzerUseNumber === undefined ? undefined : `use ${session.dialyzerUseNumber}`,

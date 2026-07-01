@@ -46,6 +46,7 @@ export function validateDialysisSession(
     | "date"
     | "preWeightKg"
     | "postWeightKg"
+    | "weightLossKg"
     | "preBpSystolic"
     | "preBpDiastolic"
     | "postBpSystolic"
@@ -61,6 +62,9 @@ export function validateDialysisSession(
   if (!inRange(session.preWeightKg, 20, 250)) errors.push("Pre-HD weight must be between 20 and 250 kg.");
   if (!inRange(session.postWeightKg, 20, 250)) errors.push("Post-HD weight must be between 20 and 250 kg.");
   if (session.postWeightKg > session.preWeightKg) errors.push("Post-HD weight cannot exceed pre-HD weight.");
+  if (session.weightLossKg !== undefined && (!isNonNegativeNumber(session.weightLossKg) || session.weightLossKg > 20)) {
+    errors.push("Weight loss must be between 0 and 20 kg.");
+  }
   if (!inRange(session.preBpSystolic, 50, 260)) errors.push("Pre-HD systolic BP must be between 50 and 260.");
   if (!inRange(session.preBpDiastolic, 30, 160)) errors.push("Pre-HD diastolic BP must be between 30 and 160.");
   if (!inRange(session.postBpSystolic, 50, 260)) errors.push("Post-HD systolic BP must be between 50 and 260.");

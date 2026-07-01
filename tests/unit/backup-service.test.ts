@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import { DialyCareDatabase } from "@/data/db/dialycare-db";
 import { DialyzerRepository, DocumentRepository, MedicineRepository, PatientRepository, SessionRepository, SettingsRepository } from "@/data/repositories";
-import { buildDemoDialyzer, buildDemoSessions, demoPatient } from "@/data/seed/demo-data";
+import { buildDemoDialyzer, buildDemoMedicine, buildDemoSessions, demoPatient } from "@/data/seed/demo-data";
 import { BackupService } from "@/features/backup/services/backup-service";
 
 function createTestDb(name = `dialycare_backup_test_${crypto.randomUUID()}`) {
@@ -40,13 +40,7 @@ describe("backup service", () => {
     if (!sessionInput) throw new Error("Demo session fixture is missing.");
 
     await sessions.create(sessionInput);
-    await medicines.create({
-      patientId: patient.id,
-      name: "Calcium tablet",
-      dosage: "500 mg",
-      frequency: "Morning",
-      status: "active",
-    });
+    await medicines.create(buildDemoMedicine(patient.id));
     await documents.create({
       patientId: patient.id,
       title: "June booklet",
@@ -63,6 +57,9 @@ describe("backup service", () => {
     const targetService = new BackupService(targetDb);
     const json = await sourceService.exportBackupJson();
     const backup = targetService.parseBackupJson(json);
+    expect(backup.data.medicines).toHaveLength(1);
+    expect(backup.data.medicines[0]?.name).toBe("Calcium Tablet");
+
     const result = await targetService.restoreBackup(backup);
 
     expect(result).toMatchObject({
@@ -77,7 +74,7 @@ describe("backup service", () => {
     const restoredSnapshot = await targetService.getSnapshot();
     expect(restoredSnapshot.patient?.name).toBe(demoPatient.name);
     expect(restoredSnapshot.sessions[0]?.preWeightKg).toBe(sessionInput.preWeightKg);
-    expect(restoredSnapshot.medicines[0]?.name).toBe("Calcium tablet");
+    expect(restoredSnapshot.medicines[0]?.name).toBe("Calcium Tablet");
     expect(restoredSnapshot.documents[0]?.title).toBe("June booklet");
     expect(restoredSnapshot.settings[0]?.backupReminderDays).toBe(3);
   });
@@ -89,5 +86,24 @@ describe("backup service", () => {
 
     expect(() => service.parseBackupJson("not-json")).toThrow("Backup file is not valid JSON.");
     expect(() => service.parseBackupJson(JSON.stringify({ appName: "OtherApp" }))).toThrow("This does not look like a DialyCare backup.");
+  });
+
+  it("rejects malformed medicine records before import", async () => {
+    const database = createTestDb();
+    databases.push(database);
+    const service = new BackupService(database);
+    const backup = await service.buildBackup();
+
+    expect(() =>
+      service.parseBackupJson(
+        JSON.stringify({
+          ...backup,
+          data: {
+            ...backup.data,
+            medicines: [{ id: "medicine_1", patientId: "patient_1" }],
+          },
+        }),
+      ),
+    ).toThrow("Backup contains an invalid medicine record.");
   });
 });

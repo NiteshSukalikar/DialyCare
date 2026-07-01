@@ -13,6 +13,9 @@
   --healing: #5dcaa5;
   --alert: #d85a30;
   --alert-soft: #faece7;
+  --warning: #8a5a00;
+  --warning-soft: #fff6e4;
+  --warning-border: #f59e0b;
   --border: #e5e2d8;
   --shadow-soft: 0 12px 32px rgba(15, 110, 86, 0.08);
 }
@@ -28,6 +31,9 @@
   --healing: #5dcaa5;
   --alert: #ff8a65;
   --alert-soft: #3a241f;
+  --warning: #ffd58a;
+  --warning-soft: #2d2414;
+  --warning-border: #d89a2b;
   --border: #31433d;
   --shadow-soft: 0 12px 32px rgba(0, 0, 0, 0.28);
 }
@@ -69,4 +75,32 @@ textarea {
 :root[data-theme="dark"] textarea {
   background-color: var(--surface);
   color: var(--text-primary);
+}
+
+input[type="date"],
+input[type="month"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] input[type="date"],
+:root[data-theme="dark"] input[type="month"] {
+  color-scheme: dark;
+}
+
+:root[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator,
+:root[data-theme="dark"] input[type="month"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(1.8);
+  opacity: 0.9;
+}
+
+.notice-warning {
+  border: 1px solid color-mix(in srgb, var(--warning-border) 45%, transparent);
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.notice-alert {
+  border: 1px solid color-mix(in srgb, var(--alert) 35%, transparent);
+  background: var(--alert-soft);
+  color: var(--alert);
 }

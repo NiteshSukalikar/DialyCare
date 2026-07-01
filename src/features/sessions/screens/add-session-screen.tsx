@@ -13,8 +13,8 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useSessionEntry } from "@/features/sessions/hooks/use-session-entry";
 import {
+  calculateUfVarianceFromWeightLossLiters,
   calculateWeightGainVsDryKg,
-  calculateUfVarianceLiters,
   calculateWeightLossKg,
   nextDialyzerUseNumber,
 } from "@/features/sessions/utils/session-calculations";
@@ -37,6 +37,7 @@ interface SessionFormState {
   sessionTime: string;
   preWeightKg: string;
   postWeightKg: string;
+  weightLossKg: string;
   preBpSystolic: string;
   preBpDiastolic: string;
   postBpSystolic: string;
@@ -62,6 +63,7 @@ const emptyForm: SessionFormState = {
   sessionTime: "",
   preWeightKg: "",
   postWeightKg: "",
+  weightLossKg: "",
   preBpSystolic: "",
   preBpDiastolic: "",
   postBpSystolic: "",
@@ -84,6 +86,7 @@ function optionalText(value: string) {
 }
 
 function numericValue(value: string) {
+  if (!value.trim()) return Number.NaN;
   return Number(value);
 }
 
@@ -139,6 +142,7 @@ export function AddSessionScreen() {
       sessionTime: snapshot.session.sessionTime ?? "",
       preWeightKg: snapshot.session.preWeightKg.toString(),
       postWeightKg: snapshot.session.postWeightKg.toString(),
+      weightLossKg: (snapshot.session.weightLossKg ?? calculateWeightLossKg(snapshot.session.preWeightKg, snapshot.session.postWeightKg) ?? "").toString(),
       preBpSystolic: snapshot.session.preBpSystolic.toString(),
       preBpDiastolic: snapshot.session.preBpDiastolic.toString(),
       postBpSystolic: snapshot.session.postBpSystolic.toString(),
@@ -159,17 +163,26 @@ export function AddSessionScreen() {
   const calculations = useMemo(() => {
     const preWeightKg = numericValue(form.preWeightKg);
     const postWeightKg = numericValue(form.postWeightKg);
+    const weightLossKg = numericValue(form.weightLossKg);
     const dryWeightKg = snapshot.patient?.dryWeightKg;
 
     return {
-      weightLossKg: calculateWeightLossKg(preWeightKg, postWeightKg),
+      calculatedWeightLossKg: calculateWeightLossKg(preWeightKg, postWeightKg),
+      weightLossKg: Number.isFinite(weightLossKg) ? weightLossKg : undefined,
       gainVsDryKg: dryWeightKg === undefined ? undefined : calculateWeightGainVsDryKg(preWeightKg, dryWeightKg),
-      ufVarianceLiters: calculateUfVarianceLiters(preWeightKg, postWeightKg, numericValue(form.ufRemovedLiters)),
+      ufVarianceLiters: calculateUfVarianceFromWeightLossLiters(Number.isFinite(weightLossKg) ? weightLossKg : undefined, numericValue(form.ufRemovedLiters)),
     };
-  }, [form.postWeightKg, form.preWeightKg, form.ufRemovedLiters, snapshot.patient?.dryWeightKg]);
+  }, [form.postWeightKg, form.preWeightKg, form.ufRemovedLiters, form.weightLossKg, snapshot.patient?.dryWeightKg]);
 
   function updateField(field: keyof SessionFormState, value: string) {
-    setForm((current) => ({ ...current, [field]: value }));
+    setForm((current) => {
+      const next = { ...current, [field]: value };
+      if (field === "preWeightKg" || field === "postWeightKg") {
+        const calculatedWeightLossKg = calculateWeightLossKg(numericValue(next.preWeightKg), numericValue(next.postWeightKg));
+        next.weightLossKg = calculatedWeightLossKg === undefined ? "" : calculatedWeightLossKg.toString();
+      }
+      return next;
+    });
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -188,11 +201,13 @@ export function AddSessionScreen() {
     const postBpSystolic = integerValue(form.postBpSystolic);
     const postBpDiastolic = integerValue(form.postBpDiastolic);
     const ufRemovedLiters = numericValue(form.ufRemovedLiters);
+    const weightLossKg = numericValue(form.weightLossKg);
     const dialyzerUseNumber = form.dialyzerUseNumber.trim() ? integerValue(form.dialyzerUseNumber) : undefined;
 
     if (!form.date) nextErrors.push("Session date is required.");
     if (!Number.isFinite(preWeightKg)) nextErrors.push("Pre-HD weight is required.");
     if (!Number.isFinite(postWeightKg)) nextErrors.push("Post-HD weight is required.");
+    if (!Number.isFinite(weightLossKg)) nextErrors.push("Weight loss is required.");
     if (!Number.isInteger(preBpSystolic) || !Number.isInteger(preBpDiastolic)) nextErrors.push("Pre-HD BP needs systolic and diastolic numbers.");
     if (!Number.isInteger(postBpSystolic) || !Number.isInteger(postBpDiastolic)) nextErrors.push("Post-HD BP needs systolic and diastolic numbers.");
     if (!Number.isFinite(ufRemovedLiters)) nextErrors.push("UF removed is required.");
@@ -210,6 +225,7 @@ export function AddSessionScreen() {
         sessionTime: optionalText(form.sessionTime),
         preWeightKg,
         postWeightKg,
+        weightLossKg,
         preBpSystolic,
         preBpDiastolic,
         postBpSystolic,
@@ -302,7 +318,7 @@ export function AddSessionScreen() {
       />
 
       {combinedErrors.length > 0 ? (
-        <div className="rounded-lg border border-brand-alert/30 bg-[#FAECE7] p-4 text-sm text-brand-alert" role="alert">
+        <div className="notice-alert rounded-lg p-4 text-sm" role="alert">
           <p className="font-semibold">Please fix these details:</p>
           <ul className="mt-2 list-disc space-y-1 pl-5">
             {combinedErrors.map((message) => (
@@ -340,6 +356,21 @@ export function AddSessionScreen() {
               step="0.1"
               type="number"
               value={form.postWeightKg}
+            />
+            <Input
+              hint={
+                calculations.calculatedWeightLossKg === undefined
+                  ? "Auto-fills after pre and post weight."
+                  : `Auto-calculated: ${calculations.calculatedWeightLossKg} kg`
+              }
+              inputMode="decimal"
+              label="Weight loss (kg)"
+              onChange={(event) => updateField("weightLossKg", event.target.value)}
+              placeholder="3.7"
+              required
+              step="0.1"
+              type="number"
+              value={form.weightLossKg}
             />
           </div>
           <div className="mt-4 grid gap-3 rounded-lg bg-brand-neutral p-3 text-sm sm:grid-cols-2">

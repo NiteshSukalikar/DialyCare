@@ -199,7 +199,7 @@ export function BackupScreen() {
         title="Backup and export"
       />
 
-      <div className="rounded-lg border border-[#F59E0B]/30 bg-[#FEF6E7] p-4 text-sm leading-6 text-brand-ink">
+      <div className="notice-warning rounded-lg p-4 text-sm leading-6">
         DialyCare stores records only in this browser. Export backups regularly, because clearing browser storage or losing this device can remove local records.
       </div>
 
@@ -210,7 +210,7 @@ export function BackupScreen() {
       ) : null}
 
       {errorMessage ? (
-        <div className="rounded-lg border border-brand-alert/30 bg-[#FAECE7] p-4 text-sm text-brand-alert" role="alert">
+        <div className="notice-alert rounded-lg p-4 text-sm" role="alert">
           {errorMessage}
         </div>
       ) : null}
@@ -231,6 +231,10 @@ export function BackupScreen() {
             <div className="flex justify-between gap-3">
               <dt className="text-brand-muted">Sessions</dt>
               <dd className="font-semibold text-brand-ink">{snapshot.sessions.length}</dd>
+            </div>
+            <div className="flex justify-between gap-3">
+              <dt className="text-brand-muted">Medicines</dt>
+              <dd className="font-semibold text-brand-ink">{snapshot.medicines.length}</dd>
             </div>
             <div className="flex justify-between gap-3">
               <dt className="text-brand-muted">Documents</dt>

@@ -44,6 +44,7 @@ export interface DialysisSession extends TimestampedRecord {
   sessionTime?: string;
   preWeightKg: number;
   postWeightKg: number;
+  weightLossKg?: number;
   preBpSystolic: number;
   preBpDiastolic: number;
   postBpSystolic: number;

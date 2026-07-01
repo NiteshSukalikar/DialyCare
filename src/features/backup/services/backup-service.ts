@@ -2,6 +2,7 @@ import { jsPDF } from "jspdf";
 
 import { appConfig } from "@/config/app";
 import { db as defaultDb, type DialyCareDatabase } from "@/data/db/dialycare-db";
+import { getSessionWeightLossKg } from "@/features/sessions/utils/session-calculations";
 import type { AppSettings, DialysisSession, Dialyzer, Medicine, Patient, PatientDocument, ThemePreference } from "@/types/core";
 
 export const BACKUP_SCHEMA_VERSION = 1;
@@ -244,6 +245,10 @@ function assertValidBackup(value: unknown): asserts value is DialyCareBackup {
 
   const patients = data.patients as unknown[];
   const sessions = data.sessions as unknown[];
+  const dialyzers = data.dialyzers as unknown[];
+  const medicines = data.medicines as unknown[];
+  const documents = data.documents as unknown[];
+  const settings = data.settings as unknown[];
 
   for (const patient of patients) {
     if (!isRecord(patient) || typeof patient.id !== "string" || typeof patient.name !== "string" || typeof patient.dryWeightKg !== "number") {
@@ -254,6 +259,30 @@ function assertValidBackup(value: unknown): asserts value is DialyCareBackup {
   for (const session of sessions) {
     if (!isRecord(session) || typeof session.id !== "string" || typeof session.patientId !== "string" || typeof session.date !== "string") {
       throw new Error("Backup contains an invalid dialysis session record.");
+    }
+  }
+
+  for (const dialyzer of dialyzers) {
+    if (!isRecord(dialyzer) || typeof dialyzer.id !== "string" || typeof dialyzer.patientId !== "string" || typeof dialyzer.name !== "string") {
+      throw new Error("Backup contains an invalid dialyzer record.");
+    }
+  }
+
+  for (const medicine of medicines) {
+    if (!isRecord(medicine) || typeof medicine.id !== "string" || typeof medicine.patientId !== "string" || typeof medicine.name !== "string") {
+      throw new Error("Backup contains an invalid medicine record.");
+    }
+  }
+
+  for (const document of documents) {
+    if (!isRecord(document) || typeof document.id !== "string" || typeof document.patientId !== "string" || typeof document.title !== "string") {
+      throw new Error("Backup contains an invalid document record.");
+    }
+  }
+
+  for (const setting of settings) {
+    if (!isRecord(setting) || typeof setting.id !== "string") {
+      throw new Error("Backup contains an invalid settings record.");
     }
   }
 }
@@ -322,6 +351,7 @@ function buildSummaryPdf(snapshot: BackupSnapshot, sessions: DialysisSession[], 
   doc.setFont("helvetica", "normal");
   addLine(`Sessions in report: ${sessions.length}`);
   addLine(`Average UF removed: ${formatAverage(sessions.map((session) => session.ufRemovedLiters))} L`);
+  addLine(`Average weight loss: ${formatAverage(sessions.map((session) => getSessionWeightLossKg(session)).filter((value): value is number => value !== undefined))} kg`);
   addLine(`Average pre-HD BP: ${formatBpAverage(sessions, "pre")}`);
   addLine(`Average post-HD BP: ${formatBpAverage(sessions, "post")}`, 10, 22);
 
@@ -335,7 +365,7 @@ function buildSummaryPdf(snapshot: BackupSnapshot, sessions: DialysisSession[], 
   doc.setFont("helvetica", "normal");
   sessions.slice(0, 16).forEach((session) => {
     addLine(
-      `${session.date} | ${session.preWeightKg} -> ${session.postWeightKg} kg | UF ${session.ufRemovedLiters} L | BP ${session.preBpSystolic}/${session.preBpDiastolic} -> ${session.postBpSystolic}/${session.postBpDiastolic} | Dialyzer use ${session.dialyzerUseNumber ?? "NA"}`,
+      `${session.date} | ${session.preWeightKg} -> ${session.postWeightKg} kg | Loss ${getSessionWeightLossKg(session) ?? "NA"} kg | UF ${session.ufRemovedLiters} L | BP ${session.preBpSystolic}/${session.preBpDiastolic} -> ${session.postBpSystolic}/${session.postBpDiastolic} | Dialyzer use ${session.dialyzerUseNumber ?? "NA"}`,
       9,
       14,
     );

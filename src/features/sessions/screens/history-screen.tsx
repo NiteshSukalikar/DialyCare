@@ -12,7 +12,10 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { PatientRepository } from "@/data/repositories";
 import { sessionEntryService } from "@/features/sessions/services/session-entry-service";
-import { calculateUfVarianceLiters, calculateWeightLossKg } from "@/features/sessions/utils/session-calculations";
+import {
+  calculateUfVarianceFromWeightLossLiters,
+  getSessionWeightLossKg,
+} from "@/features/sessions/utils/session-calculations";
 import {
   buildSessionCalendar,
   filterSessions,
@@ -247,8 +250,8 @@ export function HistoryScreen() {
             <section className="space-y-3" key={group.monthKey}>
               <h2 className="px-1 text-sm font-semibold uppercase tracking-wide text-brand-muted">{group.label}</h2>
               {group.sessions.map((session) => {
-                const weightLossKg = calculateWeightLossKg(session.preWeightKg, session.postWeightKg);
-                const ufVariance = calculateUfVarianceLiters(session.preWeightKg, session.postWeightKg, session.ufRemovedLiters);
+                const weightLossKg = getSessionWeightLossKg(session);
+                const ufVariance = calculateUfVarianceFromWeightLossLiters(weightLossKg, session.ufRemovedLiters);
 
                 return (
                   <Card
@@ -331,9 +334,9 @@ export function HistoryScreen() {
             <DetailRow
               label="Weight loss"
               value={
-                calculateWeightLossKg(selectedSession.preWeightKg, selectedSession.postWeightKg) === undefined
+                getSessionWeightLossKg(selectedSession) === undefined
                   ? undefined
-                  : `${calculateWeightLossKg(selectedSession.preWeightKg, selectedSession.postWeightKg)} kg`
+                  : `${getSessionWeightLossKg(selectedSession)} kg`
               }
             />
             <DetailRow label="Pre-HD BP" value={`${selectedSession.preBpSystolic}/${selectedSession.preBpDiastolic}`} />
@@ -342,9 +345,9 @@ export function HistoryScreen() {
             <DetailRow
               label="UF variance"
               value={
-                calculateUfVarianceLiters(selectedSession.preWeightKg, selectedSession.postWeightKg, selectedSession.ufRemovedLiters) === undefined
+                calculateUfVarianceFromWeightLossLiters(getSessionWeightLossKg(selectedSession), selectedSession.ufRemovedLiters) === undefined
                   ? undefined
-                  : `${calculateUfVarianceLiters(selectedSession.preWeightKg, selectedSession.postWeightKg, selectedSession.ufRemovedLiters)} L vs weight loss`
+                  : `${calculateUfVarianceFromWeightLossLiters(getSessionWeightLossKg(selectedSession), selectedSession.ufRemovedLiters)} L vs weight loss`
               }
             />
             <DetailRow label="Dialyzer use" value={selectedSession.dialyzerUseNumber ? `Use #${selectedSession.dialyzerUseNumber}` : undefined} />

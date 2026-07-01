@@ -11,6 +11,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardTitle } from "@/components/ui/card";
 import { buildDashboardViewModel, dashboardService, type DashboardViewModel } from "@/features/dashboard/services/dashboard-service";
+import { getSessionWeightLossKg } from "@/features/sessions/utils/session-calculations";
 
 const quickActions = [
   { href: "/add-session", label: "Add session", icon: CalendarPlus, primary: true },
@@ -194,6 +195,7 @@ export function DashboardScreen() {
           <div className="mt-4 grid gap-3 text-sm text-brand-muted sm:grid-cols-2 lg:grid-cols-4">
             <SummaryItem label="Date" value={dashboard.lastDialysisLabel} />
             <SummaryItem label="Weight" value={`${latestSession.preWeightKg} to ${latestSession.postWeightKg} kg`} />
+            <SummaryItem label="Weight loss" value={`${getSessionWeightLossKg(latestSession) ?? "--"} kg`} />
             <SummaryItem
               label="BP"
               value={`${latestSession.preBpSystolic}/${latestSession.preBpDiastolic} to ${latestSession.postBpSystolic}/${latestSession.postBpDiastolic}`}

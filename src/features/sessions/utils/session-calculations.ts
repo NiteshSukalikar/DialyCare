@@ -1,6 +1,13 @@
+import type { DialysisSession } from "@/types/core";
+
 export function calculateWeightLossKg(preWeightKg: number, postWeightKg: number) {
   if (!Number.isFinite(preWeightKg) || !Number.isFinite(postWeightKg)) return undefined;
   return Number((preWeightKg - postWeightKg).toFixed(1));
+}
+
+export function getSessionWeightLossKg(session: Pick<DialysisSession, "preWeightKg" | "postWeightKg" | "weightLossKg">) {
+  if (Number.isFinite(session.weightLossKg)) return session.weightLossKg;
+  return calculateWeightLossKg(session.preWeightKg, session.postWeightKg);
 }
 
 export function calculateWeightGainVsDryKg(preWeightKg: number, dryWeightKg: number) {
@@ -15,6 +22,10 @@ export function nextDialyzerUseNumber(currentUsage: number) {
 
 export function calculateUfVarianceLiters(preWeightKg: number, postWeightKg: number, ufRemovedLiters: number) {
   const weightLossKg = calculateWeightLossKg(preWeightKg, postWeightKg);
+  return calculateUfVarianceFromWeightLossLiters(weightLossKg, ufRemovedLiters);
+}
+
+export function calculateUfVarianceFromWeightLossLiters(weightLossKg: number | undefined, ufRemovedLiters: number) {
   if (weightLossKg === undefined || !Number.isFinite(ufRemovedLiters)) return undefined;
   return Number((weightLossKg - ufRemovedLiters).toFixed(1));
 }

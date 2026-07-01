@@ -5,8 +5,10 @@ import { buildDemoDialyzer, buildDemoSessions, demoPatient } from "@/data/seed/d
 import { DialyzerRepository, PatientRepository, SessionRepository } from "@/data/repositories";
 import { validateDialysisSession, validatePatient } from "@/data/validation/core-validation";
 import {
+  calculateUfVarianceFromWeightLossLiters,
   calculateWeightGainVsDryKg,
   calculateWeightLossKg,
+  getSessionWeightLossKg,
   nextDialyzerUseNumber,
 } from "@/features/sessions/utils/session-calculations";
 import type { CreateSessionInput } from "@/data/repositories";
@@ -38,8 +40,16 @@ describe("core validation", () => {
 describe("session calculations", () => {
   it("calculates weight loss, dry-weight gain, and next dialyzer usage", () => {
     expect(calculateWeightLossKg(62.4, 58.5)).toBe(3.9);
+    expect(calculateUfVarianceFromWeightLossLiters(3.7, 3.5)).toBe(0.2);
     expect(calculateWeightGainVsDryKg(62.4, 57)).toBe(5.4);
     expect(nextDialyzerUseNumber(7)).toBe(8);
+  });
+
+  it("prefers manually recorded weight loss over calculated session weight loss", () => {
+    const session = firstSession("patient_1", "dialyzer_1");
+
+    expect(getSessionWeightLossKg({ ...session, weightLossKg: 3.7 })).toBe(3.7);
+    expect(getSessionWeightLossKg({ ...session, weightLossKg: undefined })).toBe(3.9);
   });
 });
 

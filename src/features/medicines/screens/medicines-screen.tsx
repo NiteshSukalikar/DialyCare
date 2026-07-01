@@ -261,7 +261,7 @@ export function MedicinesScreen() {
       ) : null}
 
       {formErrors.length > 0 ? (
-        <div className="rounded-lg border border-brand-alert/30 bg-[#FAECE7] p-4 text-sm text-brand-alert" role="alert">
+        <div className="notice-alert rounded-lg p-4 text-sm" role="alert">
           <p className="font-semibold">Please fix these details:</p>
           <ul className="mt-2 list-disc space-y-1 pl-5">
             {formErrors.map((message) => (

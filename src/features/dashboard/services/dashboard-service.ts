@@ -36,9 +36,38 @@ function parseDateOnly(value: string) {
   return new Date(year, month - 1, day);
 }
 
+const dialysisWeekdayIndexes: Record<string, number> = {
+  sun: 0,
+  sunday: 0,
+  mon: 1,
+  monday: 1,
+  tue: 2,
+  tues: 2,
+  tuesday: 2,
+  wed: 3,
+  wednesday: 3,
+  thu: 4,
+  thur: 4,
+  thurs: 4,
+  thursday: 4,
+  fri: 5,
+  friday: 5,
+  sat: 6,
+  saturday: 6,
+};
+
 export function formatSessionDate(value?: string) {
   if (!value) return "No sessions yet";
   return dateFormatter.format(parseDateOnly(value));
+}
+
+export function getDialysisWeekdays(frequency?: string) {
+  if (!frequency) return [];
+
+  const matches = frequency.toLowerCase().match(/\b(sun(?:day)?|mon(?:day)?|tue(?:s|sday|day)?|wed(?:nesday)?|thu(?:r|rs|rsday|rday|day)?|fri(?:day)?|sat(?:urday)?)\b/g);
+  if (!matches) return [];
+
+  return [...new Set(matches.map((match) => dialysisWeekdayIndexes[match]).filter((day): day is number => day !== undefined))].sort((first, second) => first - second);
 }
 
 export function getDialysisIntervalDays(frequency?: string) {
@@ -67,6 +96,23 @@ export function getDialysisIntervalDays(frequency?: string) {
 }
 
 export function getNextDialysisEstimate(latestSession?: DialysisSession, frequency?: string) {
+  const weekdays = getDialysisWeekdays(frequency);
+  if (latestSession && weekdays.length > 0) {
+    const nextDate = parseDateOnly(latestSession.date);
+    const currentWeekday = nextDate.getDay();
+    const daysUntilNext = weekdays.reduce((nearest, weekday) => {
+      const daysAhead = (weekday - currentWeekday + 7) % 7 || 7;
+      return Math.min(nearest, daysAhead);
+    }, 7);
+
+    nextDate.setDate(nextDate.getDate() + daysUntilNext);
+
+    return {
+      label: dateFormatter.format(nextDate),
+      note: latestSession.sessionTime ? `Estimated around ${latestSession.sessionTime}` : `Estimated from ${frequency}`,
+    };
+  }
+
   const intervalDays = getDialysisIntervalDays(frequency);
   if (!latestSession || !intervalDays) {
     return {

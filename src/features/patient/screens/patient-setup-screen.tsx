@@ -34,6 +34,18 @@ interface DialyzerFormState {
   maxUsage: string;
 }
 
+const dialysisWeekdays = [
+  { aliases: ["mon", "monday"], label: "Mon", value: "Mon" },
+  { aliases: ["tue", "tues", "tuesday"], label: "Tue", value: "Tue" },
+  { aliases: ["wed", "wednesday"], label: "Wed", value: "Wed" },
+  { aliases: ["thu", "thur", "thurs", "thursday"], label: "Thu", value: "Thu" },
+  { aliases: ["fri", "friday"], label: "Fri", value: "Fri" },
+  { aliases: ["sat", "saturday"], label: "Sat", value: "Sat" },
+  { aliases: ["sun", "sunday"], label: "Sun", value: "Sun" },
+] as const;
+
+type DialysisWeekday = (typeof dialysisWeekdays)[number]["value"];
+
 const emptyPatientForm: PatientFormState = {
   name: "",
   uhid: "",
@@ -74,6 +86,21 @@ function parseRequiredNumber(value: string) {
   return Number(value);
 }
 
+function buildDialysisFrequency(days: DialysisWeekday[]) {
+  if (days.length === 0) return undefined;
+
+  const countLabel = days.length === 1 ? "1 time" : `${days.length} times`;
+  return `${countLabel} per week (${days.join(", ")})`;
+}
+
+function parseDialysisWeekdays(frequency?: string): DialysisWeekday[] {
+  if (!frequency) return [];
+
+  return dialysisWeekdays
+    .filter((day) => day.aliases.some((alias) => new RegExp(`\\b${alias}\\b`, "i").test(frequency)))
+    .map((day) => day.value);
+}
+
 function SelectField({
   id,
   label,
@@ -108,6 +135,7 @@ export function PatientSetupScreen() {
   const router = useRouter();
   const { error, loading, save, saving, snapshot } = usePatientSetup();
   const [patientForm, setPatientForm] = useState<PatientFormState>(emptyPatientForm);
+  const [dialysisDays, setDialysisDays] = useState<DialysisWeekday[]>([]);
   const [dialyzerForm, setDialyzerForm] = useState<DialyzerFormState>(emptyDialyzerForm);
   const [formErrors, setFormErrors] = useState<string[]>([]);
   const isEditing = Boolean(snapshot.patient);
@@ -128,6 +156,7 @@ export function PatientSetupScreen() {
       defaultHospital: snapshot.patient.defaultHospital ?? "",
       defaultDoctor: snapshot.patient.defaultDoctor ?? "",
     });
+    setDialysisDays(parseDialysisWeekdays(snapshot.patient.dialysisFrequency));
   }, [snapshot.patient]);
 
   useEffect(() => {
@@ -152,8 +181,17 @@ export function PatientSetupScreen() {
     [patientForm.defaultDoctor, patientForm.consultant],
   );
 
+  const calculatedDialysisFrequency = useMemo(() => buildDialysisFrequency(dialysisDays), [dialysisDays]);
+
   function updatePatientField(field: keyof PatientFormState, value: string) {
     setPatientForm((current) => ({ ...current, [field]: value }));
+  }
+
+  function toggleDialysisDay(day: DialysisWeekday) {
+    setDialysisDays((current) => {
+      if (current.includes(day)) return current.filter((currentDay) => currentDay !== day);
+      return dialysisWeekdays.filter((weekday) => [...current, day].includes(weekday.value)).map((weekday) => weekday.value);
+    });
   }
 
   function updateDialyzerField(field: keyof DialyzerFormState, value: string | boolean) {
@@ -197,7 +235,7 @@ export function PatientSetupScreen() {
           consultant: optionalText(patientForm.consultant),
           emergencyContact: optionalText(patientForm.emergencyContact),
           dryWeightKg,
-          dialysisFrequency: optionalText(patientForm.dialysisFrequency),
+          dialysisFrequency: calculatedDialysisFrequency ?? optionalText(patientForm.dialysisFrequency),
           defaultHospital: optionalText(effectiveDefaultHospital),
           defaultDoctor: optionalText(effectiveDefaultDoctor),
         },
@@ -232,7 +270,7 @@ export function PatientSetupScreen() {
       />
 
       {combinedErrors.length > 0 ? (
-        <div className="rounded-lg border border-brand-alert/30 bg-[#FAECE7] p-4 text-sm text-brand-alert" role="alert">
+        <div className="notice-alert rounded-lg p-4 text-sm" role="alert">
           <p className="font-semibold">Please fix these details:</p>
           <ul className="mt-2 list-disc space-y-1 pl-5">
             {combinedErrors.map((message) => (
@@ -308,12 +346,39 @@ export function PatientSetupScreen() {
               type="number"
               value={patientForm.dryWeightKg}
             />
-            <Input
-              label="Dialysis frequency"
-              onChange={(event) => updatePatientField("dialysisFrequency", event.target.value)}
-              placeholder="3 times per week"
-              value={patientForm.dialysisFrequency}
-            />
+            <fieldset className="sm:col-span-1">
+              <legend className="mb-1.5 block text-sm font-medium text-brand-muted">Dialysis days</legend>
+              <div className="grid grid-cols-4 gap-2 sm:grid-cols-7">
+                {dialysisWeekdays.map((day) => {
+                  const checked = dialysisDays.includes(day.value);
+                  return (
+                    <label
+                      className={`flex min-h-12 cursor-pointer items-center justify-center rounded-lg border px-2 text-sm font-semibold transition ${
+                        checked
+                          ? "border-brand-primary bg-brand-mint text-brand-primary"
+                          : "border-brand-border bg-white text-brand-muted hover:border-brand-primary/50"
+                      }`}
+                      key={day.value}
+                    >
+                      <input
+                        checked={checked}
+                        className="sr-only"
+                        onChange={() => toggleDialysisDay(day.value)}
+                        type="checkbox"
+                      />
+                      {day.label}
+                    </label>
+                  );
+                })}
+              </div>
+              <p className="mt-1 text-xs text-brand-muted">
+                {calculatedDialysisFrequency
+                  ? `Frequency: ${calculatedDialysisFrequency}`
+                  : patientForm.dialysisFrequency
+                    ? `Saved frequency: ${patientForm.dialysisFrequency}`
+                    : "Select dialysis days to calculate weekly frequency."}
+              </p>
+            </fieldset>
             <Input
               hint="Leave blank to use the hospital from patient details."
               label="Default hospital"

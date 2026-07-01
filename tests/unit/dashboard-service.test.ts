@@ -4,6 +4,7 @@ import {
   buildDashboardViewModel,
   formatSessionDate,
   getDialysisIntervalDays,
+  getDialysisWeekdays,
   getNextDialysisEstimate,
 } from "@/features/dashboard/services/dashboard-service";
 import type { DialysisSession, Dialyzer, Patient } from "@/types/core";
@@ -62,9 +63,22 @@ describe("dashboard service utilities", () => {
     expect(getDialysisIntervalDays("as advised")).toBeUndefined();
   });
 
+  it("derives dialysis weekdays from selected frequency text", () => {
+    expect(getDialysisWeekdays("2 times per week (Mon, Thu)")).toEqual([1, 4]);
+    expect(getDialysisWeekdays("Monday Thursday")).toEqual([1, 4]);
+    expect(getDialysisWeekdays("3 times per week")).toEqual([]);
+  });
+
   it("estimates the next dialysis date from the latest session and frequency", () => {
     expect(getNextDialysisEstimate(session, patient.dialysisFrequency)).toEqual({
       label: "24 Jun 2026",
+      note: "Estimated around 09:00",
+    });
+  });
+
+  it("estimates the next dialysis date from selected weekdays", () => {
+    expect(getNextDialysisEstimate(session, "2 times per week (Mon, Thu)")).toEqual({
+      label: "25 Jun 2026",
       note: "Estimated around 09:00",
     });
   });
