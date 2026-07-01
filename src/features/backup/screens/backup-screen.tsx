@@ -207,7 +207,7 @@ export function BackupScreen() {
         </div>
       ) : null}
 
-      <section className="grid gap-4 lg:grid-cols-3">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <Card>
           <div className="flex items-start gap-3">
             <span className="rounded-lg bg-brand-mint p-2 text-brand-primary">
@@ -262,7 +262,7 @@ export function BackupScreen() {
             </div>
           </div>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
             <Input label="From" onChange={(event) => setDoctorFrom(event.target.value)} type="date" value={doctorFrom} />
             <Input label="To" onChange={(event) => setDoctorTo(event.target.value)} type="date" value={doctorTo} />
           </div>

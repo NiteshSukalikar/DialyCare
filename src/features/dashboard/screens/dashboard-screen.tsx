@@ -329,7 +329,7 @@ function SummaryItem({ label, value }: { label: string; value: string }) {
 
 function AnalyticsMiniStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-brand-border bg-white/60 p-3">
+    <div className="rounded-lg border border-brand-border bg-brand-neutral p-3">
       <p className="text-xs font-medium text-brand-muted">{label}</p>
       <p className="mt-1 text-xl font-semibold text-brand-ink">{value}</p>
     </div>
