@@ -14,6 +14,14 @@ export class DialyCareDatabase extends Dexie {
   constructor(databaseName = DATABASE_NAME) {
     super(databaseName);
 
+    this.version(1).stores({
+      patients: "id, name, uhid, createdAt, updatedAt",
+      sessions: "id, patientId, date, dialyzerId, updatedAt",
+      dialyzers: "id, patientId, status, startedOn, updatedAt",
+      medicines: "id, patientId, status, name, updatedAt",
+      documents: "id, patientId, category, date, updatedAt",
+      settings: "id, firstRunComplete, updatedAt",
+    });
     this.version(DATABASE_VERSION).stores(stores);
   }
 }

@@ -13,3 +13,8 @@ export function nextDialyzerUseNumber(currentUsage: number) {
   return currentUsage + 1;
 }
 
+export function calculateUfVarianceLiters(preWeightKg: number, postWeightKg: number, ufRemovedLiters: number) {
+  const weightLossKg = calculateWeightLossKg(preWeightKg, postWeightKg);
+  if (weightLossKg === undefined || !Number.isFinite(ufRemovedLiters)) return undefined;
+  return Number((weightLossKg - ufRemovedLiters).toFixed(1));
+}

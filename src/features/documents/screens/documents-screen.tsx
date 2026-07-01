@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, FileText, ImageIcon, Pencil, Plus, Save, Trash2, Upload } from "lucide-react";
+import { ExternalLink, FileText, ImageIcon, Pencil, Plus, Save, Star, Trash2, Upload } from "lucide-react";
 import Link from "next/link";
 import type { ChangeEvent, FormEvent } from "react";
 import { useEffect, useState } from "react";
@@ -17,6 +17,7 @@ import {
   documentCategoryLabels,
   documentService,
   detectFileType,
+  matchesDocumentSearch,
   type DocumentFormInput,
   type DocumentSnapshot,
 } from "@/features/documents/services/document-service";
@@ -27,6 +28,7 @@ interface DocumentFormState {
   category: DocumentCategory;
   date: string;
   notes: string;
+  favorite: boolean;
   file?: File;
 }
 
@@ -39,6 +41,7 @@ const emptyForm: DocumentFormState = {
   category: "dialysis-booklet",
   date: today(),
   notes: "",
+  favorite: false,
 };
 
 function buildFormFromDocument(document: PatientDocument): DocumentFormState {
@@ -47,6 +50,7 @@ function buildFormFromDocument(document: PatientDocument): DocumentFormState {
     category: document.category,
     date: document.date,
     notes: document.notes ?? "",
+    favorite: document.favorite ?? false,
   };
 }
 
@@ -64,11 +68,13 @@ function DocumentCard({
   document,
   onDelete,
   onEdit,
+  onFavorite,
   onOpen,
 }: {
   document: PatientDocument;
   onDelete: (document: PatientDocument) => void;
   onEdit: (document: PatientDocument) => void;
+  onFavorite: (document: PatientDocument) => void;
   onOpen: (document: PatientDocument) => void;
 }) {
   const Icon = document.fileType === "image" ? ImageIcon : FileText;
@@ -83,6 +89,7 @@ function DocumentCard({
             </span>
             <CardTitle>{document.title}</CardTitle>
             <Badge tone="neutral">{fileTypeLabel(document)}</Badge>
+            {document.favorite ? <Badge tone="success">Favorite</Badge> : null}
           </div>
           <p className="mt-2 text-sm text-brand-muted">
             {documentCategoryLabels[document.category]} / {formatDate(document.date)}
@@ -90,6 +97,10 @@ function DocumentCard({
           <p className="mt-1 truncate text-xs text-brand-muted">{document.fileName ?? "Stored locally"}</p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Button onClick={() => onFavorite(document)} type="button" variant={document.favorite ? "secondary" : "ghost"}>
+            <Star aria-hidden="true" size={18} />
+            {document.favorite ? "Saved" : "Favorite"}
+          </Button>
           <Button onClick={() => onOpen(document)} type="button" variant="secondary">
             <ExternalLink aria-hidden="true" size={18} />
             Open
@@ -119,6 +130,8 @@ export function DocumentsScreen() {
   const [snapshot, setSnapshot] = useState<DocumentSnapshot>({ documents: [], groupedDocuments: {} as DocumentSnapshot["groupedDocuments"] });
   const [form, setForm] = useState<DocumentFormState>(emptyForm);
   const [editingDocument, setEditingDocument] = useState<PatientDocument | undefined>();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [formErrors, setFormErrors] = useState<string[]>([]);
@@ -148,6 +161,10 @@ export function DocumentsScreen() {
 
   function updateField(field: keyof DocumentFormState, value: string) {
     setForm((current) => ({ ...current, [field]: field === "category" ? (value as DocumentCategory) : value }));
+  }
+
+  function updateFavorite(value: boolean) {
+    setForm((current) => ({ ...current, favorite: value }));
   }
 
   function updateFile(event: ChangeEvent<HTMLInputElement>) {
@@ -228,6 +245,12 @@ export function DocumentsScreen() {
     setStatusMessage("Document deleted.");
   }
 
+  async function toggleFavorite(document: PatientDocument) {
+    await documentService.setFavorite(document.id, !document.favorite);
+    await loadSnapshot();
+    setStatusMessage(!document.favorite ? "Document added to favorites." : "Document removed from favorites.");
+  }
+
   if (loading) {
     return <LoadingState label="Loading documents..." />;
   }
@@ -247,6 +270,10 @@ export function DocumentsScreen() {
     );
   }
 
+  const visibleDocumentCount = snapshot.documents.filter(
+    (document) => matchesDocumentSearch(document, searchQuery) && (!showFavoritesOnly || document.favorite),
+  ).length;
+
   return (
     <div className="space-y-5">
       <PageHeader
@@ -263,6 +290,7 @@ export function DocumentsScreen() {
 
       <div className="rounded-lg border border-[#F59E0B]/30 bg-[#FEF6E7] p-4 text-sm text-brand-ink">
         Uploaded files are saved in this browser&apos;s local storage. Large photos and PDFs can use device space, and clearing browser data can remove them.
+        Images are compressed before storage when the browser supports it.
       </div>
 
       {statusMessage ? (
@@ -321,6 +349,11 @@ export function DocumentsScreen() {
             />
           </div>
 
+          <label className="mt-4 flex min-h-12 items-center gap-3 rounded-lg border border-brand-border bg-white px-3.5 py-2.5 text-sm font-medium text-brand-ink">
+            <input checked={form.favorite} className="h-5 w-5 accent-brand-primary" onChange={(event) => updateFavorite(event.target.checked)} type="checkbox" />
+            Mark as favorite report
+          </label>
+
           <label className="mt-4 block">
             <span className="mb-1.5 block text-sm font-medium text-brand-muted">Notes</span>
             <textarea
@@ -341,20 +374,46 @@ export function DocumentsScreen() {
       </form>
 
       <section className="space-y-4">
+        <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+          <Input
+            label="Search documents"
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Search title, category, date, notes..."
+            type="search"
+            value={searchQuery}
+          />
+          <label className="flex min-h-12 items-center gap-3 rounded-lg border border-brand-border bg-white px-3.5 py-2.5 text-sm font-medium text-brand-ink">
+            <input checked={showFavoritesOnly} className="h-5 w-5 accent-brand-primary" onChange={(event) => setShowFavoritesOnly(event.target.checked)} type="checkbox" />
+            Favorites only
+          </label>
+        </div>
         <h2 className="px-1 text-sm font-semibold uppercase tracking-wide text-brand-muted">Uploaded documents</h2>
         {snapshot.documents.length === 0 ? (
           <Card>
             <EmptyState description="Upload a booklet photo, prescription, report, bill, or note to keep it with the dialysis record." title="No documents uploaded yet" />
           </Card>
+        ) : visibleDocumentCount === 0 ? (
+          <Card>
+            <EmptyState description="Try a broader search or turn off favorites only." title="No documents match this view" />
+          </Card>
         ) : (
           documentCategories.map((category) => {
-            const documents = snapshot.groupedDocuments[category] ?? [];
+            const documents = (snapshot.groupedDocuments[category] ?? []).filter(
+              (document) => matchesDocumentSearch(document, searchQuery) && (!showFavoritesOnly || document.favorite),
+            );
             if (documents.length === 0) return null;
             return (
               <div className="space-y-3" key={category}>
                 <h3 className="px-1 text-sm font-semibold text-brand-ink">{documentCategoryLabels[category]}</h3>
                 {documents.map((document) => (
-                  <DocumentCard key={document.id} document={document} onDelete={handleDelete} onEdit={editDocument} onOpen={openDocument} />
+                  <DocumentCard
+                    key={document.id}
+                    document={document}
+                    onDelete={handleDelete}
+                    onEdit={editDocument}
+                    onFavorite={toggleFavorite}
+                    onOpen={openDocument}
+                  />
                 ))}
               </div>
             );

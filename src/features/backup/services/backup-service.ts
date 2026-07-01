@@ -2,7 +2,7 @@ import { jsPDF } from "jspdf";
 
 import { appConfig } from "@/config/app";
 import { db as defaultDb, type DialyCareDatabase } from "@/data/db/dialycare-db";
-import type { AppSettings, DialysisSession, Dialyzer, Medicine, Patient, PatientDocument } from "@/types/core";
+import type { AppSettings, DialysisSession, Dialyzer, Medicine, Patient, PatientDocument, ThemePreference } from "@/types/core";
 
 export const BACKUP_SCHEMA_VERSION = 1;
 
@@ -171,6 +171,31 @@ export class BackupService {
           firstRunComplete: true,
           backupReminderEnabled: enabled,
           backupReminderDays: days,
+        };
+
+    await this.database.settings.put(nextSettings);
+    return nextSettings;
+  }
+
+  async updateTheme(theme: ThemePreference) {
+    const settings = await this.database.settings.toArray();
+    const existing = settings[0];
+    const now = new Date().toISOString();
+
+    const nextSettings: AppSettings = existing
+      ? {
+          ...existing,
+          theme,
+          updatedAt: now,
+        }
+      : {
+          id: "settings_default",
+          createdAt: now,
+          updatedAt: now,
+          theme,
+          firstRunComplete: true,
+          backupReminderEnabled: true,
+          backupReminderDays: 7,
         };
 
     await this.database.settings.put(nextSettings);

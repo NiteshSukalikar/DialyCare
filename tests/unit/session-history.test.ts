@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildSessionCalendar,
   filterSessions,
   groupSessionsByMonth,
+  matchesSessionSearch,
   sortSessionsNewestFirst,
 } from "@/features/sessions/utils/session-history";
+import { calculateUfVarianceLiters } from "@/features/sessions/utils/session-calculations";
 import type { DialysisSession } from "@/types/core";
 
 function session(overrides: Partial<DialysisSession>): DialysisSession {
@@ -62,6 +65,30 @@ describe("session history utilities", () => {
     ).toEqual(["month"]);
   });
 
+  it("filters smart review views for high UF, BP ranges, and dialyzer use", () => {
+    const sessions = [
+      session({ id: "high-uf", preBpSystolic: 140, postBpSystolic: 125, ufRemovedLiters: 4.2 }),
+      session({ id: "high-bp", preBpSystolic: 168, postBpSystolic: 125, ufRemovedLiters: 3 }),
+      session({ id: "low-post-bp", preBpSystolic: 140, postBpSystolic: 98, ufRemovedLiters: 3 }),
+      session({ id: "dialyzer", preBpSystolic: 140, postBpSystolic: 125, dialyzerUseNumber: 8, ufRemovedLiters: 3 }),
+      session({ id: "plain", preBpSystolic: 140, postBpSystolic: 125, dialyzerId: undefined, dialyzerUseNumber: undefined, ufRemovedLiters: 3 }),
+    ];
+
+    expect(filterSessions(sessions, "high-uf").map((item) => item.id)).toEqual(["high-uf"]);
+    expect(filterSessions(sessions, "high-pre-bp").map((item) => item.id)).toEqual(["high-bp"]);
+    expect(filterSessions(sessions, "low-post-bp").map((item) => item.id)).toEqual(["low-post-bp"]);
+    expect(filterSessions(sessions, "with-dialyzer").map((item) => item.id)).toEqual(["dialyzer"]);
+  });
+
+  it("matches session search text across notes and clinical record fields", () => {
+    const item = session({ hospital: "Apollo", remarks: "Stable after dialysis", ufRemovedLiters: 3.9 });
+
+    expect(matchesSessionSearch(item, "apollo")).toBe(true);
+    expect(matchesSessionSearch(item, "stable")).toBe(true);
+    expect(matchesSessionSearch(item, "160/90")).toBe(true);
+    expect(matchesSessionSearch(item, "missing")).toBe(false);
+  });
+
   it("groups filtered sessions by month with stable newest-first order", () => {
     const groups = groupSessionsByMonth([
       session({ id: "june-older", date: "2026-06-01" }),
@@ -71,5 +98,21 @@ describe("session history utilities", () => {
 
     expect(groups.map((group) => group.label)).toEqual(["June 2026", "May 2026"]);
     expect(groups[0]?.sessions.map((item) => item.id)).toEqual(["june-newer", "june-older"]);
+  });
+
+  it("builds a monthly calendar with sessions attached to their dates", () => {
+    const calendar = buildSessionCalendar(
+      [session({ id: "first", date: "2026-06-01" }), session({ id: "second", date: "2026-06-22" })],
+      "2026-06",
+    );
+
+    expect(calendar).toHaveLength(30);
+    expect(calendar[0]).toMatchObject({ date: "2026-06-01", dayNumber: 1 });
+    expect(calendar[21]?.sessions.map((item) => item.id)).toEqual(["second"]);
+  });
+
+  it("calculates UF variance against recorded weight loss", () => {
+    expect(calculateUfVarianceLiters(62.4, 58.5, 3.9)).toBe(0);
+    expect(calculateUfVarianceLiters(62.4, 58.7, 3.9)).toBe(-0.2);
   });
 });

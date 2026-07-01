@@ -1,6 +1,15 @@
 import type { DialysisSession } from "@/types/core";
 
-export type SessionHistoryFilter = "all" | "week" | "month" | "last-3-months" | "custom";
+export type SessionHistoryFilter =
+  | "all"
+  | "week"
+  | "month"
+  | "last-3-months"
+  | "custom"
+  | "high-uf"
+  | "high-pre-bp"
+  | "low-post-bp"
+  | "with-dialyzer";
 
 export interface CustomDateRange {
   from?: string;
@@ -10,6 +19,12 @@ export interface CustomDateRange {
 export interface SessionMonthGroup {
   monthKey: string;
   label: string;
+  sessions: DialysisSession[];
+}
+
+export interface SessionCalendarDay {
+  date: string;
+  dayNumber: number;
   sessions: DialysisSession[];
 }
 
@@ -40,6 +55,29 @@ function isWithin(session: DialysisSession, from?: string, to?: string) {
   return true;
 }
 
+export function matchesSessionSearch(session: DialysisSession, query: string) {
+  const normalized = query.trim().toLowerCase();
+  if (!normalized) return true;
+
+  return [
+    session.date,
+    session.sessionTime,
+    session.hospital,
+    session.doctor,
+    session.complications,
+    session.injectionsGiven,
+    session.medicineChanges,
+    session.machineNotes,
+    session.remarks,
+    session.ufRemovedLiters.toString(),
+    `${session.preBpSystolic}/${session.preBpDiastolic}`,
+    `${session.postBpSystolic}/${session.postBpDiastolic}`,
+    session.dialyzerUseNumber === undefined ? undefined : `use ${session.dialyzerUseNumber}`,
+  ]
+    .filter(Boolean)
+    .some((value) => value?.toLowerCase().includes(normalized));
+}
+
 export function sortSessionsNewestFirst(sessions: DialysisSession[]) {
   return [...sessions].sort((a, b) => {
     const aKey = `${a.date}T${a.sessionTime ?? "00:00"}`;
@@ -61,6 +99,11 @@ export function filterSessions(
   if (filter === "custom") {
     return sorted.filter((session) => isWithin(session, customRange.from, customRange.to));
   }
+
+  if (filter === "high-uf") return sorted.filter((session) => session.ufRemovedLiters >= 4);
+  if (filter === "high-pre-bp") return sorted.filter((session) => session.preBpSystolic >= 160 || session.preBpDiastolic >= 100);
+  if (filter === "low-post-bp") return sorted.filter((session) => session.postBpSystolic <= 100 || session.postBpDiastolic <= 60);
+  if (filter === "with-dialyzer") return sorted.filter((session) => Boolean(session.dialyzerId || session.dialyzerUseNumber));
 
   const todayKey = toDateOnly(today);
   const from =
@@ -91,6 +134,22 @@ export function groupSessionsByMonth(sessions: DialysisSession[]) {
       monthKey,
       label,
       sessions: groupedSessions,
+    };
+  });
+}
+
+export function buildSessionCalendar(sessions: DialysisSession[], monthKey: string): SessionCalendarDay[] {
+  const [year, month] = monthKey.split("-").map(Number);
+  if (!year || !month) return [];
+
+  const daysInMonth = new Date(year, month, 0).getDate();
+  return Array.from({ length: daysInMonth }, (_, index) => {
+    const dayNumber = index + 1;
+    const date = `${monthKey}-${dayNumber.toString().padStart(2, "0")}`;
+    return {
+      date,
+      dayNumber,
+      sessions: sortSessionsNewestFirst(sessions.filter((session) => session.date === date)),
     };
   });
 }

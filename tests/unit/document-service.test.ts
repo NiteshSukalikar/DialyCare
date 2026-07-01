@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { DialyCareDatabase } from "@/data/db/dialycare-db";
 import { DocumentRepository, PatientRepository } from "@/data/repositories";
 import { demoPatient } from "@/data/seed/demo-data";
-import { detectFileType, DocumentService } from "@/features/documents/services/document-service";
+import { compressImageFile, detectFileType, DocumentService, matchesDocumentSearch } from "@/features/documents/services/document-service";
 
 function createTestDb() {
   return new DialyCareDatabase(`dialycare_document_test_${crypto.randomUUID()}`);
@@ -95,6 +95,37 @@ describe("document service", () => {
     await service.deleteDocument(saved.id);
     const snapshot = await service.getSnapshot();
     expect(snapshot.documents).toHaveLength(0);
+  });
+
+  it("can mark documents as favorite and match document search text", async () => {
+    database = createTestDb();
+    const patients = new PatientRepository(database);
+    const documents = new DocumentRepository(database);
+    const service = new DocumentService(patients, documents);
+
+    const patient = await patients.create(demoPatient);
+    const saved = await service.saveDocument(patient.id, {
+      title: "Important KFT report",
+      category: "kft",
+      date: "2026-06-15",
+      notes: "Carry to doctor visit",
+      favorite: true,
+      file: makeFile("kft.pdf", "application/pdf", "pdf-data"),
+    });
+
+    expect(saved.favorite).toBe(true);
+    expect(matchesDocumentSearch(saved, "doctor")).toBe(true);
+    expect(matchesDocumentSearch(saved, "KFT")).toBe(true);
+    expect(matchesDocumentSearch(saved, "missing")).toBe(false);
+
+    const updated = await service.setFavorite(saved.id, false);
+    expect(updated.favorite).toBe(false);
+  });
+
+  it("keeps unsupported image compression environments on the original file", async () => {
+    const file = makeFile("notes.txt", "text/plain", "plain-data");
+
+    await expect(compressImageFile(file)).resolves.toEqual({ file, compressed: false });
   });
 
   it("requires a file when creating a document", async () => {

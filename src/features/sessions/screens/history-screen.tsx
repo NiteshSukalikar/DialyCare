@@ -12,10 +12,12 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { PatientRepository } from "@/data/repositories";
 import { sessionEntryService } from "@/features/sessions/services/session-entry-service";
-import { calculateWeightLossKg } from "@/features/sessions/utils/session-calculations";
+import { calculateUfVarianceLiters, calculateWeightLossKg } from "@/features/sessions/utils/session-calculations";
 import {
+  buildSessionCalendar,
   filterSessions,
   groupSessionsByMonth,
+  matchesSessionSearch,
   type SessionHistoryFilter,
 } from "@/features/sessions/utils/session-history";
 import type { DialysisSession } from "@/types/core";
@@ -26,6 +28,10 @@ const filters: { value: SessionHistoryFilter; label: string }[] = [
   { value: "month", label: "This month" },
   { value: "last-3-months", label: "Last 3 months" },
   { value: "custom", label: "Custom date" },
+  { value: "high-uf", label: "High UF" },
+  { value: "high-pre-bp", label: "High pre-BP" },
+  { value: "low-post-bp", label: "Low post-BP" },
+  { value: "with-dialyzer", label: "With dialyzer" },
 ];
 
 function formatSessionDate(session: DialysisSession) {
@@ -55,6 +61,8 @@ export function HistoryScreen() {
   const [activeFilter, setActiveFilter] = useState<SessionHistoryFilter>("all");
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [calendarMonth, setCalendarMonth] = useState(new Date().toISOString().slice(0, 7));
   const [selectedSession, setSelectedSession] = useState<DialysisSession | null>(null);
   const [deletingSessionId, setDeletingSessionId] = useState<string | null>(null);
 
@@ -89,8 +97,9 @@ export function HistoryScreen() {
   const filteredSessions = filterSessions(sessions, activeFilter, new Date(), {
     from: customFrom || undefined,
     to: customTo || undefined,
-  });
+  }).filter((session) => matchesSessionSearch(session, searchQuery));
   const groupedSessions = groupSessionsByMonth(filteredSessions);
+  const calendarDays = buildSessionCalendar(sessions, calendarMonth);
 
   async function handleDeleteSession(session: DialysisSession) {
     if (!window.confirm("Delete this dialysis session? This cannot be undone.")) return;
@@ -132,7 +141,14 @@ export function HistoryScreen() {
         </div>
       ) : null}
 
-      <Card>
+      <Card className="space-y-4">
+        <Input
+          label="Search records"
+          onChange={(event) => setSearchQuery(event.target.value)}
+          placeholder="Search notes, hospital, BP, UF, date..."
+          type="search"
+          value={searchQuery}
+        />
         <div className="flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Session history filters">
           {filters.map((filter) => (
             <button
@@ -155,6 +171,55 @@ export function HistoryScreen() {
             <Input label="To date" onChange={(event) => setCustomTo(event.target.value)} type="date" value={customTo} />
           </div>
         ) : null}
+      </Card>
+
+      <Card>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <CardTitle>Calendar view</CardTitle>
+            <p className="mt-1 text-sm text-brand-muted">Monthly review of saved dialysis days.</p>
+          </div>
+          <Input
+            className="sm:w-48"
+            label="Calendar month"
+            onChange={(event) => setCalendarMonth(event.target.value)}
+            type="month"
+            value={calendarMonth}
+          />
+        </div>
+        <div className="mt-4 grid grid-cols-7 gap-1 text-center text-xs font-semibold text-brand-muted">
+          {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
+            <span key={day}>{day}</span>
+          ))}
+        </div>
+        <div className="mt-2 grid grid-cols-7 gap-1">
+          {calendarDays.map((day, index) => {
+            const firstDate = new Date(`${calendarMonth}-01T00:00:00`);
+            const offset = firstDate.getDay() === 0 ? 6 : firstDate.getDay() - 1;
+            const hasSessions = day.sessions.length > 0;
+
+            return (
+              <button
+                className={`min-h-14 rounded-lg border p-1 text-left text-sm transition ${
+                  hasSessions
+                    ? "border-brand-primary bg-brand-mint text-brand-primary"
+                    : "border-brand-border bg-white text-brand-muted hover:bg-brand-neutral"
+                }`}
+                key={day.date}
+                onClick={() => {
+                  setActiveFilter("custom");
+                  setCustomFrom(day.date);
+                  setCustomTo(day.date);
+                }}
+                style={index === 0 ? { gridColumnStart: offset + 1 } : undefined}
+                type="button"
+              >
+                <span className="font-semibold">{day.dayNumber}</span>
+                {hasSessions ? <span className="mt-1 block text-xs">{day.sessions.length} session{day.sessions.length > 1 ? "s" : ""}</span> : null}
+              </button>
+            );
+          })}
+        </div>
       </Card>
 
       {sessions.length === 0 ? (
@@ -183,6 +248,7 @@ export function HistoryScreen() {
               <h2 className="px-1 text-sm font-semibold uppercase tracking-wide text-brand-muted">{group.label}</h2>
               {group.sessions.map((session) => {
                 const weightLossKg = calculateWeightLossKg(session.preWeightKg, session.postWeightKg);
+                const ufVariance = calculateUfVarianceLiters(session.preWeightKg, session.postWeightKg, session.ufRemovedLiters);
 
                 return (
                   <Card
@@ -216,6 +282,12 @@ export function HistoryScreen() {
                             <dt className="font-medium text-brand-ink">BP</dt>
                             <dd>{bpLabel(session)}</dd>
                           </div>
+                          {ufVariance !== undefined ? (
+                            <div>
+                              <dt className="font-medium text-brand-ink">UF variance</dt>
+                              <dd>{ufVariance > 0 ? "+" : ""}{ufVariance} L vs weight loss</dd>
+                            </div>
+                          ) : null}
                           {session.dialyzerUseNumber !== undefined ? (
                             <div>
                               <dt className="font-medium text-brand-ink">Dialyzer use</dt>
@@ -267,6 +339,14 @@ export function HistoryScreen() {
             <DetailRow label="Pre-HD BP" value={`${selectedSession.preBpSystolic}/${selectedSession.preBpDiastolic}`} />
             <DetailRow label="Post-HD BP" value={`${selectedSession.postBpSystolic}/${selectedSession.postBpDiastolic}`} />
             <DetailRow label="UF removed" value={`${selectedSession.ufRemovedLiters} L`} />
+            <DetailRow
+              label="UF variance"
+              value={
+                calculateUfVarianceLiters(selectedSession.preWeightKg, selectedSession.postWeightKg, selectedSession.ufRemovedLiters) === undefined
+                  ? undefined
+                  : `${calculateUfVarianceLiters(selectedSession.preWeightKg, selectedSession.postWeightKg, selectedSession.ufRemovedLiters)} L vs weight loss`
+              }
+            />
             <DetailRow label="Dialyzer use" value={selectedSession.dialyzerUseNumber ? `Use #${selectedSession.dialyzerUseNumber}` : undefined} />
             <DetailRow label="Hospital" value={selectedSession.hospital} />
             <DetailRow label="Doctor" value={selectedSession.doctor} />

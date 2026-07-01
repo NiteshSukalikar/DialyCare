@@ -2,15 +2,32 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 import type { ReactNode } from "react";
 
 import { appConfig } from "@/config/app";
+import { SettingsRepository } from "@/data/repositories";
 import { bottomNavRoutes, mainRoutes } from "@/routes/navigation";
 import { Logo } from "@/components/layout/logo";
 import { PwaLifecycle } from "@/components/layout/pwa-lifecycle";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+
+  useEffect(() => {
+    let cancelled = false;
+
+    new SettingsRepository().get().then((settings) => {
+      if (cancelled) return;
+      const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const theme = settings.theme === "system" ? (systemDark ? "dark" : "light") : settings.theme;
+      document.documentElement.dataset.theme = theme;
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-4 pb-24 pt-4 sm:px-6 lg:px-8">

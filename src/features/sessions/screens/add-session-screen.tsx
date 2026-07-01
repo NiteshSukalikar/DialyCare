@@ -1,8 +1,9 @@
 "use client";
 
+import { Mic, MicOff } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { FormEvent } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { LoadingState } from "@/components/common/loading-state";
 import { PageHeader } from "@/components/layout/page-header";
@@ -13,9 +14,23 @@ import { Input } from "@/components/ui/input";
 import { useSessionEntry } from "@/features/sessions/hooks/use-session-entry";
 import {
   calculateWeightGainVsDryKg,
+  calculateUfVarianceLiters,
   calculateWeightLossKg,
   nextDialyzerUseNumber,
 } from "@/features/sessions/utils/session-calculations";
+
+type SpeechRecognitionLike = {
+  lang: string;
+  interimResults: boolean;
+  continuous: boolean;
+  onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+  onend: (() => void) | null;
+  onerror: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+};
+
+type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
 
 interface SessionFormState {
   date: string;
@@ -83,7 +98,18 @@ export function AddSessionScreen() {
   const { deleting, error, loading, remove, save, saving, snapshot } = useSessionEntry(sessionId);
   const [form, setForm] = useState<SessionFormState>(emptyForm);
   const [formErrors, setFormErrors] = useState<string[]>([]);
+  const [voiceSupported, setVoiceSupported] = useState(false);
+  const [listening, setListening] = useState(false);
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const isEditing = Boolean(sessionId);
+
+  useEffect(() => {
+    const speechWindow = window as Window & {
+      SpeechRecognition?: SpeechRecognitionConstructor;
+      webkitSpeechRecognition?: SpeechRecognitionConstructor;
+    };
+    setVoiceSupported(Boolean(speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition));
+  }, []);
 
   useEffect(() => {
     if (!snapshot.patient) return;
@@ -138,8 +164,9 @@ export function AddSessionScreen() {
     return {
       weightLossKg: calculateWeightLossKg(preWeightKg, postWeightKg),
       gainVsDryKg: dryWeightKg === undefined ? undefined : calculateWeightGainVsDryKg(preWeightKg, dryWeightKg),
+      ufVarianceLiters: calculateUfVarianceLiters(preWeightKg, postWeightKg, numericValue(form.ufRemovedLiters)),
     };
-  }, [form.postWeightKg, form.preWeightKg, snapshot.patient?.dryWeightKg]);
+  }, [form.postWeightKg, form.preWeightKg, form.ufRemovedLiters, snapshot.patient?.dryWeightKg]);
 
   function updateField(field: keyof SessionFormState, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -209,6 +236,43 @@ export function AddSessionScreen() {
     if (!window.confirm("Delete this dialysis session? This cannot be undone.")) return;
     await remove();
     router.push("/history?session=deleted");
+  }
+
+  function toggleVoiceRemarks() {
+    if (listening) {
+      recognitionRef.current?.stop();
+      setListening(false);
+      return;
+    }
+
+    const speechWindow = window as Window & {
+      SpeechRecognition?: SpeechRecognitionConstructor;
+      webkitSpeechRecognition?: SpeechRecognitionConstructor;
+    };
+    const Recognition = speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition;
+    if (!Recognition) return;
+
+    const recognition = new Recognition();
+    recognition.lang = "en-IN";
+    recognition.interimResults = false;
+    recognition.continuous = false;
+    recognition.onresult = (event) => {
+      const transcript = Array.from(event.results)
+        .map((result) => result[0]?.transcript ?? "")
+        .join(" ")
+        .trim();
+      if (transcript) {
+        setForm((current) => ({
+          ...current,
+          remarks: current.remarks.trim() ? `${current.remarks.trim()} ${transcript}` : transcript,
+        }));
+      }
+    };
+    recognition.onend = () => setListening(false);
+    recognition.onerror = () => setListening(false);
+    recognitionRef.current = recognition;
+    setListening(true);
+    recognition.start();
   }
 
   if (loading) {
@@ -287,6 +351,12 @@ export function AddSessionScreen() {
               <span className="text-brand-muted">Gain vs dry weight: </span>
               <strong className="text-brand-ink">{calculations.gainVsDryKg === undefined ? "--" : `${calculations.gainVsDryKg} kg`}</strong>
             </p>
+            <p>
+              <span className="text-brand-muted">UF variance: </span>
+              <strong className="text-brand-ink">
+                {calculations.ufVarianceLiters === undefined ? "--" : `${calculations.ufVarianceLiters > 0 ? "+" : ""}${calculations.ufVarianceLiters} L`}
+              </strong>
+            </p>
           </div>
         </Card>
 
@@ -349,7 +419,19 @@ export function AddSessionScreen() {
             <Input label="Machine notes" onChange={(event) => updateField("machineNotes", event.target.value)} placeholder="Optional" value={form.machineNotes} />
           </div>
           <label className="mt-4 block" htmlFor="remarks">
-            <span className="mb-1.5 block text-sm font-medium text-brand-muted">Remarks</span>
+            <span className="mb-1.5 flex items-center justify-between gap-3 text-sm font-medium text-brand-muted">
+              Remarks
+              {voiceSupported ? (
+                <button
+                  className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-brand-mint px-3 text-sm font-semibold text-brand-primary transition hover:bg-[#D3EFE5]"
+                  onClick={toggleVoiceRemarks}
+                  type="button"
+                >
+                  {listening ? <MicOff aria-hidden="true" size={17} /> : <Mic aria-hidden="true" size={17} />}
+                  {listening ? "Stop" : "Voice note"}
+                </button>
+              ) : null}
+            </span>
             <textarea
               className="min-h-28 w-full rounded-lg border border-brand-border bg-white px-3.5 py-2.5 text-base text-brand-ink outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-mint"
               id="remarks"

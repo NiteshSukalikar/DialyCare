@@ -6,16 +6,16 @@ const config = {
     extend: {
       colors: {
         brand: {
-          primary: "#0F6E56",
-          healing: "#5DCAA5",
-          mint: "#E1F5EE",
-          background: "#FBF7F0",
-          surface: "#FFFFFF",
-          neutral: "#F1EFE8",
-          alert: "#D85A30",
-          ink: "#2C2C2A",
-          muted: "#5F6B66",
-          border: "#E5E2D8",
+          primary: "var(--primary)",
+          healing: "var(--healing)",
+          mint: "var(--primary-soft)",
+          background: "var(--background)",
+          surface: "var(--surface)",
+          neutral: "var(--surface-muted)",
+          alert: "var(--alert)",
+          ink: "var(--text-primary)",
+          muted: "var(--text-secondary)",
+          border: "var(--border)",
         },
       },
       borderRadius: {
@@ -34,7 +34,7 @@ const config = {
         ],
       },
       boxShadow: {
-        soft: "0 12px 32px rgba(15, 110, 86, 0.08)",
+        soft: "var(--shadow-soft)",
       },
     },
   },

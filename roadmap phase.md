@@ -412,14 +412,14 @@ The MVP is complete only when all of these are done.
 
 | ER Step | Feature | Reason | ER Status |
 |---|---|---|---|
-| 14.1 | Search records | Quickly find old sessions, reports, or notes | Incomplete |
-| 14.2 | Calendar view | Easier monthly review of dialysis schedule | Incomplete |
-| 14.3 | Smart filters | Faster review by date range, high UF, BP ranges, dialyzer | Incomplete |
-| 14.4 | Favorite reports | Quickly access important prescriptions or lab reports | Incomplete |
-| 14.5 | Voice note remarks | Faster note capture after dialysis | Incomplete |
-| 14.6 | Photo compression | Reduce local storage usage | Incomplete |
-| 14.7 | Dark mode | Optional comfort feature, not default | Incomplete |
-| 14.8 | UF variance calculation | Compare expected vs actual fluid removal | Incomplete |
+| 14.1 | Search records | Quickly find old sessions, reports, or notes | Complete |
+| 14.2 | Calendar view | Easier monthly review of dialysis schedule | Complete |
+| 14.3 | Smart filters | Faster review by date range, high UF, BP ranges, dialyzer | Complete |
+| 14.4 | Favorite reports | Quickly access important prescriptions or lab reports | Complete |
+| 14.5 | Voice note remarks | Faster note capture after dialysis | Complete |
+| 14.6 | Photo compression | Reduce local storage usage | Complete |
+| 14.7 | Dark mode | Optional comfort feature, not default | Complete |
+| 14.8 | UF variance calculation | Compare expected vs actual fluid removal | Complete |
 
 ## Phase 15: Smart Health Tracking
 

@@ -13,6 +13,7 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { appConfig } from "@/config/app";
 import { backupService, type BackupSnapshot } from "@/features/backup/services/backup-service";
+import type { ThemePreference } from "@/types/core";
 
 function currentMonth() {
   return new Date().toISOString().slice(0, 7);
@@ -58,6 +59,7 @@ export function BackupScreen() {
   const [month, setMonth] = useState(currentMonth());
   const [reminderEnabled, setReminderEnabled] = useState(true);
   const [reminderDays, setReminderDays] = useState(7);
+  const [theme, setTheme] = useState<ThemePreference>("system");
 
   async function loadSnapshot() {
     const nextSnapshot = await backupService.getSnapshot();
@@ -66,6 +68,7 @@ export function BackupScreen() {
     if (settings) {
       setReminderEnabled(settings.backupReminderEnabled);
       setReminderDays(settings.backupReminderDays ?? 7);
+      setTheme(settings.theme);
     }
   }
 
@@ -81,6 +84,7 @@ export function BackupScreen() {
         if (settings) {
           setReminderEnabled(settings.backupReminderEnabled);
           setReminderDays(settings.backupReminderDays ?? 7);
+          setTheme(settings.theme);
         }
       })
       .finally(() => {
@@ -153,6 +157,16 @@ export function BackupScreen() {
     await runAction(async () => {
       await backupService.updateBackupReminder(reminderEnabled, reminderDays);
       setStatusMessage("Backup reminder setting saved.");
+    });
+  }
+
+  async function saveTheme(nextTheme: ThemePreference) {
+    setTheme(nextTheme);
+    const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    document.documentElement.dataset.theme = nextTheme === "system" ? (systemDark ? "dark" : "light") : nextTheme;
+    await runAction(async () => {
+      await backupService.updateTheme(nextTheme);
+      setStatusMessage("Theme preference saved.");
     });
   }
 
@@ -310,6 +324,33 @@ export function BackupScreen() {
             <Save aria-hidden="true" size={18} />
             Save
           </Button>
+        </div>
+      </Card>
+
+      <Card>
+        <div className="flex items-start gap-3">
+          <span className="rounded-lg bg-brand-mint p-2 text-brand-primary">
+            <Settings aria-hidden="true" size={20} />
+          </span>
+          <div>
+            <CardTitle>Appearance</CardTitle>
+            <p className="mt-1 text-sm text-brand-muted">Choose a comfortable theme for this device.</p>
+          </div>
+        </div>
+        <div className="mt-4 grid gap-2 sm:grid-cols-3" role="group" aria-label="Theme preference">
+          {(["system", "light", "dark"] as const).map((option) => (
+            <button
+              className={`min-h-11 rounded-lg px-4 py-2.5 text-sm font-semibold transition ${
+                theme === option ? "bg-brand-primary text-brand-mint" : "bg-brand-neutral text-brand-muted hover:bg-brand-mint hover:text-brand-primary"
+              }`}
+              disabled={busy}
+              key={option}
+              onClick={() => saveTheme(option)}
+              type="button"
+            >
+              {option === "system" ? "System" : option === "light" ? "Light" : "Dark"}
+            </button>
+          ))}
         </div>
       </Card>
 

@@ -93,6 +93,7 @@ export interface PatientDocument extends TimestampedRecord {
   fileBlob?: Blob;
   date: string;
   notes?: string;
+  favorite?: boolean;
 }
 
 export interface AppSettings extends TimestampedRecord {
