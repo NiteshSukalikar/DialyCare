@@ -22,7 +22,7 @@ The MVP must help the caregiver:
 | Styling | Tailwind CSS with clean medical theme | Complete |
 | Component style | Simple reusable UI components, ShadCN-style patterns optional | Complete |
 | Local database | IndexedDB via Dexie.js | Complete |
-| Charts | Recharts | Incomplete |
+| Charts | Recharts | Complete |
 | Export | JSON backup, PDF summary using jsPDF or pdfmake | Complete |
 | Storage model | Offline-first local device storage | Complete |
 | Authentication | No login for MVP | Incomplete |
@@ -294,21 +294,21 @@ Provide simple visual trends that help the caregiver and doctor understand patte
 
 | ER Step | Task | Acceptance Criteria | ER Status |
 |---|---|---|---|
-| 10.1 | Build analytics screen | Screen loads summary cards and charts from session data | Incomplete |
-| 10.2 | Add date range filter | User can view this month, last 3 months, or custom range | Incomplete |
-| 10.3 | Add pre-HD weight trend | Chart shows pre-HD weight over time | Incomplete |
-| 10.4 | Add post-HD weight trend | Chart shows post-HD weight over time | Incomplete |
-| 10.5 | Add UF removed trend | Chart shows UF removed over time | Incomplete |
-| 10.6 | Add pre-HD BP trend | Chart shows systolic/diastolic pre-HD BP over time | Incomplete |
-| 10.7 | Add post-HD BP trend | Chart shows systolic/diastolic post-HD BP over time | Incomplete |
-| 10.8 | Add summary cards | Average UF, average BP, average weight gain, highest UF, lowest post-HD BP | Incomplete |
-| 10.9 | Add chart empty states | Clear message appears when there is not enough data | Incomplete |
+| 10.1 | Build analytics screen | Screen loads summary cards and charts from session data | Complete |
+| 10.2 | Add date range filter | User can view this month, last 3 months, or custom range | Complete |
+| 10.3 | Add pre-HD weight trend | Chart shows pre-HD weight over time | Complete |
+| 10.4 | Add post-HD weight trend | Chart shows post-HD weight over time | Complete |
+| 10.5 | Add UF removed trend | Chart shows UF removed over time | Complete |
+| 10.6 | Add pre-HD BP trend | Chart shows systolic/diastolic pre-HD BP over time | Complete |
+| 10.7 | Add post-HD BP trend | Chart shows systolic/diastolic post-HD BP over time | Complete |
+| 10.8 | Add summary cards | Average UF, average BP, average weight gain, highest UF, lowest post-HD BP | Complete |
+| 10.9 | Add chart empty states | Clear message appears when there is not enough data | Complete |
 
 ## MVP Constraint
 
 | Constraint | Reason | ER Status |
 |---|---|---|
-| No complex medical interpretation | Charts are for record review, not diagnosis | Incomplete |
+| No complex medical interpretation | Charts are for record review, not diagnosis | Complete |
 
 ---
 
@@ -398,7 +398,7 @@ The MVP is complete only when all of these are done.
 | Medicines | Medicine list can be managed and exported | Complete |
 | Documents | Reports/booklet images can be uploaded and reviewed locally | Complete |
 | Dashboard | Latest patient, weight, dialyzer, and quick actions are visible | Complete |
-| Analytics | Basic trends and summary cards are available | Incomplete |
+| Analytics | Basic trends and summary cards are available | Complete |
 | Backup | Full JSON export/import works reliably | Complete |
 | PDF | Doctor/monthly PDF export works with disclaimer | Complete |
 | PWA | App is installable and works offline after first load | Incomplete |
@@ -484,7 +484,7 @@ The MVP is complete only when all of these are done.
 | 8 | Phase 8: Medicines | Important supporting record area | Incomplete |
 | 9 | Phase 9: Reports & Documents | Replaces paper booklet storage | Complete |
 | 10 | Phase 11: Backup & PDF Export | Mandatory before real-world daily use | Complete |
-| 11 | Phase 10: Analytics & Trends | Useful after enough session data exists | Incomplete |
+| 11 | Phase 10: Analytics & Trends | Useful after enough session data exists | Complete |
 | 12 | Phase 12: PWA Readiness | Install/offline hardening for actual phone use | Incomplete |
 | 13 | Phase 13: QA & Release | Stabilize before calling MVP complete | Incomplete |
 
