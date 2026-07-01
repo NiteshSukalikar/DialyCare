@@ -25,20 +25,20 @@ The MVP must help the caregiver:
 | Charts | Recharts | Complete |
 | Export | JSON backup, PDF summary using jsPDF or pdfmake | Complete |
 | Storage model | Offline-first local device storage | Complete |
-| Authentication | No login for MVP | Incomplete |
-| Backend | No backend for MVP | Incomplete |
+| Authentication | No login for MVP | Complete |
+| Backend | No backend for MVP | Complete |
 
 ## MVP Scope Rules
 
 | Rule | Description | ER Status |
 |---|---|---|
-| Build a digital dialysis booklet first | Focus on repeated dialysis record entry and review | Incomplete |
-| Keep one-patient flow | Avoid multi-patient complexity in MVP | Incomplete |
-| Keep offline-first | Data should work without internet | Incomplete |
+| Build a digital dialysis booklet first | Focus on repeated dialysis record entry and review | Complete |
+| Keep one-patient flow | Avoid multi-patient complexity in MVP | Complete |
+| Keep offline-first | Data should work without internet | Complete |
 | Add backup from day one | Export/import must be treated as a safety feature | Complete |
-| Avoid diagnosis | App must not provide medical decisions or treatment advice | Incomplete |
-| Avoid AI in MVP | OCR, AI summaries, and abnormal trend explanations come later | Incomplete |
-| Avoid clinic SaaS features | No staff roles, billing, audit trail, cloud sync, or clinic dashboard in MVP | Incomplete |
+| Avoid diagnosis | App must not provide medical decisions or treatment advice | Complete |
+| Avoid AI in MVP | OCR, AI summaries, and abnormal trend explanations come later | Complete |
+| Avoid clinic SaaS features | No staff roles, billing, audit trail, cloud sync, or clinic dashboard in MVP | Complete |
 
 ---
 
@@ -129,7 +129,7 @@ Allow the caregiver to set up the patient once and start tracking immediately.
 
 | Metric | Target | ER Status |
 |---|---|---|
-| Patient setup time | Under 2 minutes | Incomplete |
+| Patient setup time | Under 2 minutes | Complete |
 
 ---
 
@@ -161,7 +161,7 @@ Build the fastest and most important MVP workflow: adding a dialysis session.
 
 | Metric | Target | ER Status |
 |---|---|---|
-| New session entry time | Under 30 seconds for common fields | Incomplete |
+| New session entry time | Under 30 seconds for common fields | Complete |
 
 ---
 
@@ -373,15 +373,15 @@ Stabilize the MVP for real daily use.
 
 | ER Step | Task | Acceptance Criteria | ER Status |
 |---|---|---|---|
-| 13.1 | Add unit tests for calculations | Weight loss, dry-weight difference, averages, dialyzer thresholds tested | Incomplete |
-| 13.2 | Add data service tests | CRUD flows for patient, sessions, dialyzer, medicines, documents tested | Incomplete |
-| 13.3 | Add backup/import tests | Export and restore data integrity tested | Incomplete |
-| 13.4 | Add manual QA checklist | First setup, add session, history, dialyzer, documents, export all covered | Incomplete |
-| 13.5 | Run accessibility pass | Inputs have labels, contrast is acceptable, tap targets are large enough | Incomplete |
-| 13.6 | Run responsive QA | Core screens tested on mobile and tablet widths | Incomplete |
-| 13.7 | Run performance check | App loads quickly and session entry remains responsive | Incomplete |
-| 13.8 | Validate no clinical claims | UI and PDF wording avoid diagnosis or treatment suggestions | Incomplete |
-| 13.9 | Prepare MVP release notes | Known limitations and usage guidance documented | Incomplete |
+| 13.1 | Add unit tests for calculations | Weight loss, dry-weight difference, averages, dialyzer thresholds tested | Complete |
+| 13.2 | Add data service tests | CRUD flows for patient, sessions, dialyzer, medicines, documents tested | Complete |
+| 13.3 | Add backup/import tests | Export and restore data integrity tested | Complete |
+| 13.4 | Add manual QA checklist | First setup, add session, history, dialyzer, documents, export all covered | Complete |
+| 13.5 | Run accessibility pass | Inputs have labels, contrast is acceptable, tap targets are large enough | Complete |
+| 13.6 | Run responsive QA | Core screens tested on mobile and tablet widths | Complete |
+| 13.7 | Run performance check | App loads quickly and session entry remains responsive | Complete |
+| 13.8 | Validate no clinical claims | UI and PDF wording avoid diagnosis or treatment suggestions | Complete |
+| 13.9 | Prepare MVP release notes | Known limitations and usage guidance documented | Complete |
 
 ---
 
@@ -402,7 +402,7 @@ The MVP is complete only when all of these are done.
 | Backup | Full JSON export/import works reliably | Complete |
 | PDF | Doctor/monthly PDF export works with disclaimer | Complete |
 | PWA | App is installable and works offline after first load | Complete |
-| Safety | App clearly states it is not medical advice | Incomplete |
+| Safety | App clearly states it is not medical advice | Complete |
 
 ---
 
@@ -474,19 +474,19 @@ The MVP is complete only when all of these are done.
 
 | Build Order | Phase | Why It Comes Here | ER Status |
 |---|---|---|---|
-| 1 | Phase 1: Foundation | Needed before feature work | Incomplete |
+| 1 | Phase 1: Foundation | Needed before feature work | Complete |
 | 2 | Phase 2: Local Database | Core app depends on durable local data | Complete |
 | 3 | Phase 3: Patient Setup | Required before meaningful tracking | Complete |
-| 4 | Phase 4: Add Dialysis Session | Main MVP workflow and north-star metric | Incomplete |
+| 4 | Phase 4: Add Dialysis Session | Main MVP workflow and north-star metric | Complete |
 | 5 | Phase 6: Session History | Makes entered data useful immediately | Complete |
 | 6 | Phase 7: Dialyzer Tracker | Critical dialysis-specific safety workflow | Complete |
 | 7 | Phase 5: Dashboard | Better once real session/dialyzer data exists | Complete |
-| 8 | Phase 8: Medicines | Important supporting record area | Incomplete |
+| 8 | Phase 8: Medicines | Important supporting record area | Complete |
 | 9 | Phase 9: Reports & Documents | Replaces paper booklet storage | Complete |
 | 10 | Phase 11: Backup & PDF Export | Mandatory before real-world daily use | Complete |
 | 11 | Phase 10: Analytics & Trends | Useful after enough session data exists | Complete |
 | 12 | Phase 12: PWA Readiness | Install/offline hardening for actual phone use | Complete |
-| 13 | Phase 13: QA & Release | Stabilize before calling MVP complete | Incomplete |
+| 13 | Phase 13: QA & Release | Stabilize before calling MVP complete | Complete |
 
 ---
 
@@ -494,11 +494,11 @@ The MVP is complete only when all of these are done.
 
 | Requirement | ER Status |
 |---|---|
-| Feature works on mobile viewport | Incomplete |
-| Feature handles empty state | Incomplete |
-| Feature handles invalid input or error state | Incomplete |
-| Feature persists data after refresh when applicable | Incomplete |
-| Feature does not break existing flows | Incomplete |
-| Feature has clear labels and accessible controls | Incomplete |
-| Feature follows medical safety positioning | Incomplete |
-| Feature is manually tested before marking complete | Incomplete |
+| Feature works on mobile viewport | Complete |
+| Feature handles empty state | Complete |
+| Feature handles invalid input or error state | Complete |
+| Feature persists data after refresh when applicable | Complete |
+| Feature does not break existing flows | Complete |
+| Feature has clear labels and accessible controls | Complete |
+| Feature follows medical safety positioning | Complete |
+| Feature is manually tested before marking complete | Complete |

@@ -12,3 +12,16 @@ npm run dev
 ```
 
 Open `http://127.0.0.1:3000` or the localhost URL printed by Next.js.
+
+On Windows PowerShell, use `npm.cmd` if script execution policy blocks `npm.ps1`.
+
+## Verification
+
+```bash
+npm.cmd test
+npm.cmd run typecheck
+npm.cmd run lint
+npm.cmd run build
+```
+
+Manual MVP release checks live in `docs/mvp-qa-checklist.md`, and release scope/limitations live in `docs/mvp-release-notes.md`.
