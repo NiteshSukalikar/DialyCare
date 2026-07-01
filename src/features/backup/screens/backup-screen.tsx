@@ -242,8 +242,8 @@ export function BackupScreen() {
         </div>
       ) : null}
 
-      <section className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <Card>
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <Card className="flex h-full flex-col">
           <div className="flex items-start gap-3">
             <span className="rounded-lg bg-brand-mint p-2 text-brand-primary">
               <FileArchive aria-hidden="true" size={20} />
@@ -269,7 +269,7 @@ export function BackupScreen() {
             </div>
           </dl>
 
-          <div className="mt-5 grid gap-3">
+          <div className="mt-auto grid gap-3 pt-5">
             <Button disabled={busy} onClick={exportFullBackup} type="button">
               <Download aria-hidden="true" size={18} />
               Export full backup
@@ -282,7 +282,7 @@ export function BackupScreen() {
           </div>
         </Card>
 
-        <Card>
+        <Card className="flex h-full flex-col">
           <div className="flex items-start gap-3">
             <span className="rounded-lg bg-brand-mint p-2 text-brand-primary">
               <FileJson aria-hidden="true" size={20} />
@@ -312,7 +312,7 @@ export function BackupScreen() {
             </div>
           </dl>
 
-          <div className="mt-5 grid gap-3">
+          <div className="mt-auto grid gap-3 pt-5">
             <Button disabled={busy} onClick={exportJsonBackup} type="button">
               <Download aria-hidden="true" size={18} />
               Export records JSON
@@ -325,7 +325,7 @@ export function BackupScreen() {
           </div>
         </Card>
 
-        <Card>
+        <Card className="flex h-full flex-col">
           <div className="flex items-start gap-3">
             <span className="rounded-lg bg-brand-mint p-2 text-brand-primary">
               <FileText aria-hidden="true" size={20} />
@@ -341,10 +341,12 @@ export function BackupScreen() {
             <Input label="To" onChange={(event) => setDoctorTo(event.target.value)} type="date" value={doctorTo} />
           </div>
 
-          <Button className="mt-5 w-full" disabled={busy || doctorFrom > doctorTo} onClick={exportDoctorPdf} type="button">
-            <Download aria-hidden="true" size={18} />
-            Export doctor PDF
-          </Button>
+          <div className="mt-auto pt-5">
+            <Button className="w-full" disabled={busy || doctorFrom > doctorTo} onClick={exportDoctorPdf} type="button">
+              <Download aria-hidden="true" size={18} />
+              Export doctor PDF
+            </Button>
+          </div>
         </Card>
 
         <Card>
