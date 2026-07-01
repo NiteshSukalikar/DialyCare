@@ -7,12 +7,14 @@ import type { ReactNode } from "react";
 import { appConfig } from "@/config/app";
 import { bottomNavRoutes, mainRoutes } from "@/routes/navigation";
 import { Logo } from "@/components/layout/logo";
+import { PwaLifecycle } from "@/components/layout/pwa-lifecycle";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-4 pb-24 pt-4 sm:px-6 lg:px-8">
+      <PwaLifecycle />
       <header className="sticky top-0 z-20 -mx-4 border-b border-brand-border/80 bg-brand-background/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
           <Logo />

@@ -29,4 +29,11 @@ export default [
       ...reactHooks.configs.recommended.rules,
     },
   },
+  {
+    files: ["public/sw.js"],
+    languageOptions: {
+      ecmaVersion: 2022,
+      globals: globals.serviceworker,
+    },
+  },
 ];

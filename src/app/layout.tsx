@@ -18,10 +18,23 @@ export const metadata: Metadata = {
   },
   description: appConfig.description,
   applicationName: appConfig.name,
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: appConfig.shortName,
+  },
+  icons: {
+    icon: [
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/icons/icon-192.png", sizes: "192x192" }],
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0F6E56",
+  themeColor: appConfig.themeColor,
   width: "device-width",
   initialScale: 1,
 };

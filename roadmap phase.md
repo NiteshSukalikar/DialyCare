@@ -17,7 +17,7 @@ The MVP must help the caregiver:
 
 | Area | Decision | ER Status |
 |---|---|---|
-| Application type | Mobile-first Progressive Web App | Incomplete |
+| Application type | Mobile-first Progressive Web App | Complete |
 | Frontend | React / Next.js or Vite React | Complete |
 | Styling | Tailwind CSS with clean medical theme | Complete |
 | Component style | Simple reusable UI components, ShadCN-style patterns optional | Complete |
@@ -352,14 +352,14 @@ Make the app installable and reliable for phone/tablet usage.
 
 | ER Step | Task | Acceptance Criteria | ER Status |
 |---|---|---|---|
-| 12.1 | Add PWA manifest | App has name, icons, theme color, and display mode | Incomplete |
-| 12.2 | Add service worker | App shell loads offline after first visit | Incomplete |
-| 12.3 | Add install metadata | Browser supports install/add-to-home-screen where available | Incomplete |
-| 12.4 | Add offline state handling | App shows helpful message if network-dependent action is unavailable | Incomplete |
-| 12.5 | Verify IndexedDB offline flow | Patient/session/document data works offline | Incomplete |
-| 12.6 | Add app icons | Icons look professional on home screen | Incomplete |
-| 12.7 | Test mobile viewport | Main flows work at common phone widths | Incomplete |
-| 12.8 | Test tablet viewport | Layout remains readable and not stretched | Incomplete |
+| 12.1 | Add PWA manifest | App has name, icons, theme color, and display mode | Complete |
+| 12.2 | Add service worker | App shell loads offline after first visit | Complete |
+| 12.3 | Add install metadata | Browser supports install/add-to-home-screen where available | Complete |
+| 12.4 | Add offline state handling | App shows helpful message if network-dependent action is unavailable | Complete |
+| 12.5 | Verify IndexedDB offline flow | Patient/session/document data works offline | Complete |
+| 12.6 | Add app icons | Icons look professional on home screen | Complete |
+| 12.7 | Test mobile viewport | Main flows work at common phone widths | Complete |
+| 12.8 | Test tablet viewport | Layout remains readable and not stretched | Complete |
 
 ---
 
@@ -401,7 +401,7 @@ The MVP is complete only when all of these are done.
 | Analytics | Basic trends and summary cards are available | Complete |
 | Backup | Full JSON export/import works reliably | Complete |
 | PDF | Doctor/monthly PDF export works with disclaimer | Complete |
-| PWA | App is installable and works offline after first load | Incomplete |
+| PWA | App is installable and works offline after first load | Complete |
 | Safety | App clearly states it is not medical advice | Incomplete |
 
 ---
@@ -485,7 +485,7 @@ The MVP is complete only when all of these are done.
 | 9 | Phase 9: Reports & Documents | Replaces paper booklet storage | Complete |
 | 10 | Phase 11: Backup & PDF Export | Mandatory before real-world daily use | Complete |
 | 11 | Phase 10: Analytics & Trends | Useful after enough session data exists | Complete |
-| 12 | Phase 12: PWA Readiness | Install/offline hardening for actual phone use | Incomplete |
+| 12 | Phase 12: PWA Readiness | Install/offline hardening for actual phone use | Complete |
 | 13 | Phase 13: QA & Release | Stabilize before calling MVP complete | Incomplete |
 
 ---
