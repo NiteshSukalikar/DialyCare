@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, FileJson, FileText, RefreshCcw, Save, Settings, Upload } from "lucide-react";
+import { Download, FileArchive, FileJson, FileText, RefreshCcw, Save, Settings, Upload } from "lucide-react";
 import type { ChangeEvent } from "react";
 import { useEffect, useState } from "react";
 
@@ -118,6 +118,15 @@ export function BackupScreen() {
     });
   }
 
+  async function exportFullBackup() {
+    await runAction(async () => {
+      const backupPackage = await backupService.exportBackupPackage();
+      const fileDate = new Date().toISOString().slice(0, 10);
+      downloadBlob(backupPackage, `dialycare-full-backup-${fileDate}.zip`);
+      setStatusMessage("Full backup downloaded with records and uploaded files.");
+    });
+  }
+
   async function importJsonBackup(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = "";
@@ -132,7 +141,33 @@ export function BackupScreen() {
       if (!confirmed) return;
 
       const result = await backupService.restoreBackup(backup);
-      setStatusMessage(`Backup restored: ${result.patients} patient, ${result.sessions} sessions, ${result.medicines} medicines, ${result.documents} documents.`);
+      setStatusMessage(
+        `Records-only backup restored: ${result.patients} patient, ${result.sessions} sessions, ${result.medicines} medicines, ${result.documents} documents. Uploaded files are not included in JSON backups.`,
+      );
+    });
+  }
+
+  async function importFullBackup(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    await runAction(async () => {
+      const preview = await backupService.parseBackupPackage(file);
+      const missingMessage =
+        preview.missingFiles.length > 0
+          ? `\n\nWarning: ${preview.missingFiles.length} uploaded file(s) are missing from this package. Their document records will be restored without previews.`
+          : "";
+      const confirmed = window.confirm(
+        `Import this full DialyCare backup from ${formatDateTime(preview.backup.exportedAt)}? This will replace all local patient records, sessions, medicines, documents, uploaded files, and settings on this device.${missingMessage}`,
+      );
+      if (!confirmed) return;
+
+      const result = await backupService.restoreBackupPackage(preview);
+      const missingText = result.missingFiles ? ` ${result.missingFiles} document file(s) were missing from the backup package.` : "";
+      setStatusMessage(
+        `Full backup restored: ${result.patients} patient, ${result.sessions} sessions, ${result.medicines} medicines, ${result.documents} documents.${missingText}`,
+      );
     });
   }
 
@@ -186,7 +221,7 @@ export function BackupScreen() {
   return (
     <div className="space-y-5">
       <PageHeader
-        description="Export local records, restore from JSON, and create doctor-friendly PDF summaries."
+        description="Export full backups with uploaded files, restore records, and create doctor-friendly PDF summaries."
         eyebrow="Safety"
         title="Backup and export"
       />
@@ -211,11 +246,50 @@ export function BackupScreen() {
         <Card>
           <div className="flex items-start gap-3">
             <span className="rounded-lg bg-brand-mint p-2 text-brand-primary">
+              <FileArchive aria-hidden="true" size={20} />
+            </span>
+            <div>
+              <CardTitle>Full backup package</CardTitle>
+              <p className="mt-1 text-sm text-brand-muted">Includes records, medicines, document metadata, uploaded images, PDFs, and settings.</p>
+            </div>
+          </div>
+
+          <dl className="mt-4 space-y-2 text-sm">
+            <div className="flex justify-between gap-3">
+              <dt className="text-brand-muted">Documents with files</dt>
+              <dd className="font-semibold text-brand-ink">{safeSnapshot.documents.filter((document) => document.fileBlob).length}</dd>
+            </div>
+            <div className="flex justify-between gap-3">
+              <dt className="text-brand-muted">Total documents</dt>
+              <dd className="font-semibold text-brand-ink">{safeSnapshot.documents.length}</dd>
+            </div>
+            <div className="flex justify-between gap-3">
+              <dt className="text-brand-muted">Last backup</dt>
+              <dd className="text-right font-semibold text-brand-ink">{formatDateTime(settings?.lastBackupAt)}</dd>
+            </div>
+          </dl>
+
+          <div className="mt-5 grid gap-3">
+            <Button disabled={busy} onClick={exportFullBackup} type="button">
+              <Download aria-hidden="true" size={18} />
+              Export full backup
+            </Button>
+            <label className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg bg-brand-mint px-4 py-2.5 text-sm font-semibold text-brand-primary transition hover:bg-[#D3EFE5]">
+              <Upload aria-hidden="true" size={18} />
+              Import full backup
+              <input accept="application/zip,.zip" className="sr-only" disabled={busy} onChange={importFullBackup} type="file" />
+            </label>
+          </div>
+        </Card>
+
+        <Card>
+          <div className="flex items-start gap-3">
+            <span className="rounded-lg bg-brand-mint p-2 text-brand-primary">
               <FileJson aria-hidden="true" size={20} />
             </span>
             <div>
-              <CardTitle>JSON backup</CardTitle>
-              <p className="mt-1 text-sm text-brand-muted">Includes patient, sessions, dialyzers, medicines, document metadata, and settings.</p>
+              <CardTitle>Records-only JSON</CardTitle>
+              <p className="mt-1 text-sm text-brand-muted">Includes patient, sessions, dialyzers, medicines, document metadata, and settings. Uploaded files are not included.</p>
             </div>
           </div>
 
@@ -241,11 +315,11 @@ export function BackupScreen() {
           <div className="mt-5 grid gap-3">
             <Button disabled={busy} onClick={exportJsonBackup} type="button">
               <Download aria-hidden="true" size={18} />
-              Export JSON
+              Export records JSON
             </Button>
             <label className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg bg-brand-mint px-4 py-2.5 text-sm font-semibold text-brand-primary transition hover:bg-[#D3EFE5]">
               <Upload aria-hidden="true" size={18} />
-              Import JSON
+              Import records JSON
               <input accept="application/json,.json" className="sr-only" disabled={busy} onChange={importJsonBackup} type="file" />
             </label>
           </div>

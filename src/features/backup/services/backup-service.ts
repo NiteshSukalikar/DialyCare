@@ -1,4 +1,5 @@
 import { jsPDF } from "jspdf";
+import JSZip from "jszip";
 
 import { appConfig } from "@/config/app";
 import { db as defaultDb, type DialyCareDatabase } from "@/data/db/dialycare-db";
@@ -9,6 +10,7 @@ export const BACKUP_SCHEMA_VERSION = 1;
 
 type BackupDocument = Omit<PatientDocument, "fileBlob"> & {
   hasStoredFile: boolean;
+  backupFilePath?: string;
 };
 
 export interface DialyCareBackup {
@@ -42,6 +44,13 @@ export interface RestoreResult {
   medicines: number;
   documents: number;
   settings: number;
+  missingFiles?: number;
+}
+
+export interface BackupPackagePreview {
+  backup: DialyCareBackup;
+  zip: JSZip;
+  missingFiles: string[];
 }
 
 export class BackupService {
@@ -96,6 +105,46 @@ export class BackupService {
     return json;
   }
 
+  async exportBackupPackage(): Promise<Blob> {
+    const snapshot = await this.getSnapshot();
+    const zip = new JSZip();
+    const documentsFolder = zip.folder("documents");
+
+    const documents: BackupDocument[] = [];
+
+    for (const { fileBlob, ...document } of snapshot.documents) {
+      const backupFilePath = fileBlob ? buildDocumentBackupPath(document) : undefined;
+      if (fileBlob && backupFilePath) {
+        documentsFolder?.file(backupFilePath.replace("documents/", ""), await fileBlob.arrayBuffer());
+      }
+
+      documents.push({
+        ...document,
+        hasStoredFile: Boolean(fileBlob),
+        backupFilePath,
+      });
+    }
+
+    const backup: DialyCareBackup = {
+      appName: "DialyCare",
+      schemaVersion: BACKUP_SCHEMA_VERSION,
+      exportedAt: new Date().toISOString(),
+      data: {
+        patients: snapshot.patients,
+        sessions: snapshot.sessions,
+        dialyzers: snapshot.dialyzers,
+        medicines: snapshot.medicines,
+        documents,
+        settings: snapshot.settings,
+      },
+    };
+
+    zip.file("backup.json", JSON.stringify(backup, null, 2));
+    const blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 } });
+    await this.markBackupExported(backup.exportedAt);
+    return blob;
+  }
+
   parseBackupJson(json: string): DialyCareBackup {
     let parsed: unknown;
 
@@ -109,12 +158,28 @@ export class BackupService {
     return parsed;
   }
 
-  async restoreBackup(backup: DialyCareBackup): Promise<RestoreResult> {
+  async parseBackupPackage(file: Blob): Promise<BackupPackagePreview> {
+    const zip = await JSZip.loadAsync(await file.arrayBuffer());
+    const backupFile = zip.file("backup.json");
+    if (!backupFile) throw new Error("Backup package is missing backup.json.");
+
+    const backup = this.parseBackupJson(await backupFile.async("string"));
+    const missingFiles = backup.data.documents
+      .filter((document) => document.hasStoredFile && document.backupFilePath && !zip.file(document.backupFilePath))
+      .map((document) => document.title);
+
+    return { backup, zip, missingFiles };
+  }
+
+  async restoreBackup(backup: DialyCareBackup, filesByDocumentId: Map<string, Blob> = new Map()): Promise<RestoreResult> {
     assertValidBackup(backup);
 
     const documents: PatientDocument[] = backup.data.documents.map((document) => {
-      const restoredDocument: Partial<BackupDocument> = { ...document };
+      const restoredDocument: Partial<PatientDocument & BackupDocument> = { ...document };
       delete restoredDocument.hasStoredFile;
+      delete restoredDocument.backupFilePath;
+      const fileBlob = filesByDocumentId.get(document.id);
+      if (fileBlob) restoredDocument.fileBlob = fileBlob;
       return restoredDocument as PatientDocument;
     });
 
@@ -149,7 +214,22 @@ export class BackupService {
       medicines: backup.data.medicines.length,
       documents: documents.length,
       settings: backup.data.settings.length,
+      missingFiles: backup.data.documents.filter((document) => document.hasStoredFile && !filesByDocumentId.has(document.id)).length,
     };
+  }
+
+  async restoreBackupPackage(preview: BackupPackagePreview): Promise<RestoreResult> {
+    const filesByDocumentId = new Map<string, Blob>();
+
+    for (const document of preview.backup.data.documents) {
+      if (!document.backupFilePath) continue;
+      const zippedFile = preview.zip.file(document.backupFilePath);
+      if (!zippedFile) continue;
+      const blob = await zippedFile.async("blob");
+      filesByDocumentId.set(document.id, blob);
+    }
+
+    return this.restoreBackup(preview.backup, filesByDocumentId);
   }
 
   async updateBackupReminder(enabled: boolean, days: number) {
@@ -420,3 +500,30 @@ function buildTrendLine(sessions: DialysisSession[]) {
 }
 
 export const backupService = new BackupService();
+
+function buildDocumentBackupPath(document: Omit<PatientDocument, "fileBlob">) {
+  const extension = getDocumentExtension(document);
+  const baseName = sanitizeFileSegment(document.fileName ?? document.title ?? document.id);
+  return `documents/${document.id}-${baseName}${extension}`;
+}
+
+function getDocumentExtension(document: Omit<PatientDocument, "fileBlob">) {
+  const fileName = document.fileName ?? "";
+  const existingExtension = fileName.match(/\.[a-z0-9]{1,8}$/i)?.[0];
+  if (existingExtension) return existingExtension.toLowerCase();
+  if (document.mimeType === "application/pdf") return ".pdf";
+  if (document.mimeType === "image/png") return ".png";
+  if (document.mimeType === "image/webp") return ".webp";
+  if (document.mimeType?.startsWith("image/")) return ".jpg";
+  return ".bin";
+}
+
+function sanitizeFileSegment(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/\.[a-z0-9]{1,8}$/i, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 48) || "document";
+}

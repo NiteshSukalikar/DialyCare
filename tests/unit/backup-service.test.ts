@@ -79,6 +79,46 @@ describe("backup service", () => {
     expect(restoredSnapshot.settings[0]?.backupReminderDays).toBe(3);
   });
 
+  it("exports and restores uploaded document files through the full backup package", async () => {
+    const sourceDb = createTestDb();
+    const targetDb = createTestDb();
+    databases.push(sourceDb, targetDb);
+
+    const patients = new PatientRepository(sourceDb);
+    const documents = new DocumentRepository(sourceDb);
+    const patient = await patients.create(demoPatient);
+    const fileBlob = new Blob(["booklet image bytes"], { type: "image/jpeg" });
+
+    await documents.create({
+      patientId: patient.id,
+      title: "Booklet page with file",
+      category: "dialysis-booklet",
+      fileType: "image",
+      fileName: "booklet.jpg",
+      mimeType: "image/jpeg",
+      fileBlob,
+      date: "2026-06-22",
+      notes: "This file should travel with the backup package.",
+    });
+
+    const sourceService = new BackupService(sourceDb);
+    const targetService = new BackupService(targetDb);
+    const backupPackage = await sourceService.exportBackupPackage();
+    const preview = await targetService.parseBackupPackage(backupPackage);
+
+    expect(preview.backup.data.documents[0]?.backupFilePath).toContain("documents/");
+    expect(preview.missingFiles).toHaveLength(0);
+
+    const result = await targetService.restoreBackupPackage(preview);
+    expect(result).toMatchObject({ patients: 1, documents: 1, missingFiles: 0 });
+
+    const restoredSnapshot = await targetService.getSnapshot();
+    const restoredDocument = restoredSnapshot.documents[0];
+    expect(restoredDocument?.title).toBe("Booklet page with file");
+    expect(restoredDocument?.fileBlob).toBeInstanceOf(Blob);
+    await expect(restoredDocument?.fileBlob?.text()).resolves.toBe("booklet image bytes");
+  });
+
   it("rejects invalid backup files before restore", () => {
     const database = createTestDb();
     databases.push(database);
