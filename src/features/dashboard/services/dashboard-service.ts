@@ -7,6 +7,8 @@ export interface DashboardSnapshot {
   patient?: Patient;
   activeDialyzer?: Dialyzer;
   latestSession?: DialysisSession;
+  sessions?: DialysisSession[];
+  dialyzers?: Dialyzer[];
 }
 
 export interface DashboardViewModel extends DashboardSnapshot {
@@ -20,6 +22,10 @@ export interface DashboardViewModel extends DashboardSnapshot {
   dialyzerStatusLabel: string;
   dialyzerStatusTone: "success" | "warning";
   dialyzerUsagePercent: number;
+  averagePreHdWeightLabel: string;
+  averagePostHdWeightLabel: string;
+  averageUfRemovedLabel: string;
+  averageDialyzerUseCountLabel: string;
   nextDialysisLabel: string;
   nextDialysisNote: string;
 }
@@ -130,10 +136,22 @@ export function getNextDialysisEstimate(latestSession?: DialysisSession, frequen
   };
 }
 
+function average(values: number[]) {
+  if (!values.length) return undefined;
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+function formatAverage(value: number | undefined, suffix: string) {
+  if (value === undefined || !Number.isFinite(value)) return "--";
+  return `${Number(value.toFixed(1))}${suffix}`;
+}
+
 export function buildDashboardViewModel(snapshot: DashboardSnapshot): DashboardViewModel {
   const { activeDialyzer, latestSession, patient } = snapshot;
+  const sessions = snapshot.sessions ?? (latestSession ? [latestSession] : []);
+  const dialyzers = snapshot.dialyzers ?? (activeDialyzer ? [activeDialyzer] : []);
   const nextDialysis = getNextDialysisEstimate(latestSession, patient?.dialysisFrequency);
-  const weightDifference = patient && latestSession ? calculateWeightGainVsDryKg(latestSession.preWeightKg, patient.dryWeightKg) : undefined;
+  const weightDifference = patient && latestSession ? calculateWeightGainVsDryKg(latestSession.postWeightKg, patient.dryWeightKg) : undefined;
   const dialyzerStatusState = activeDialyzer ? getDialyzerUsageState(activeDialyzer) : "normal";
 
   return {
@@ -148,6 +166,10 @@ export function buildDashboardViewModel(snapshot: DashboardSnapshot): DashboardV
     dialyzerStatusLabel: activeDialyzer ? getDialyzerStatusLabel(activeDialyzer) : "Add dialyzer",
     dialyzerStatusTone: dialyzerStatusState === "normal" ? "success" : "warning",
     dialyzerUsagePercent: activeDialyzer ? getDialyzerUsagePercent(activeDialyzer) : 0,
+    averagePreHdWeightLabel: formatAverage(average(sessions.map((session) => session.preWeightKg)), " kg"),
+    averagePostHdWeightLabel: formatAverage(average(sessions.map((session) => session.postWeightKg)), " kg"),
+    averageUfRemovedLabel: formatAverage(average(sessions.map((session) => session.ufRemovedLiters)), " L"),
+    averageDialyzerUseCountLabel: formatAverage(average(dialyzers.map((dialyzer) => dialyzer.currentUsage)), " uses"),
     nextDialysisLabel: nextDialysis.label,
     nextDialysisNote: nextDialysis.note,
   };
@@ -164,12 +186,14 @@ export class DashboardService {
     const patient = await this.patients.getPrimaryPatient();
     if (!patient) return {};
 
-    const [latestSession, activeDialyzer] = await Promise.all([
-      this.sessions.getLatest(patient.id),
+    const [sessions, activeDialyzer, dialyzers] = await Promise.all([
+      this.sessions.listByPatient(patient.id),
       this.dialyzers.getActive(patient.id),
+      this.dialyzers.listByPatient(patient.id),
     ]);
+    const latestSession = sessions[0];
 
-    return { patient, latestSession, activeDialyzer };
+    return { patient, latestSession, activeDialyzer, sessions, dialyzers };
   }
 }
 

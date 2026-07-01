@@ -7,7 +7,7 @@ import {
   matchesSessionSearch,
   sortSessionsNewestFirst,
 } from "@/features/sessions/utils/session-history";
-import { calculateUfVarianceLiters } from "@/features/sessions/utils/session-calculations";
+import { calculateUfVarianceLiters, calculateWeightGainSinceLastPostHdKg } from "@/features/sessions/utils/session-calculations";
 import type { DialysisSession } from "@/types/core";
 
 function session(overrides: Partial<DialysisSession>): DialysisSession {
@@ -114,5 +114,11 @@ describe("session history utilities", () => {
   it("calculates UF variance against recorded weight loss", () => {
     expect(calculateUfVarianceLiters(62.4, 58.5, 3.9)).toBe(0);
     expect(calculateUfVarianceLiters(62.4, 58.7, 3.9)).toBe(-0.2);
+  });
+
+  it("calculates current weight gain since the last post-HD weight", () => {
+    expect(calculateWeightGainSinceLastPostHdKg(61.2, 58.5)).toBe(2.7);
+    expect(calculateWeightGainSinceLastPostHdKg(58.2, 58.5)).toBe(-0.3);
+    expect(calculateWeightGainSinceLastPostHdKg(Number.NaN, 58.5)).toBeUndefined();
   });
 });

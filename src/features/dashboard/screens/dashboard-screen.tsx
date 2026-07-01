@@ -10,8 +10,9 @@ import { LoadingState } from "@/components/common/loading-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { buildDashboardViewModel, dashboardService, type DashboardViewModel } from "@/features/dashboard/services/dashboard-service";
-import { getSessionWeightLossKg } from "@/features/sessions/utils/session-calculations";
+import { calculateWeightGainSinceLastPostHdKg, getSessionWeightLossKg } from "@/features/sessions/utils/session-calculations";
 
 const quickActions = [
   { href: "/add-session", label: "Add session", icon: CalendarPlus, primary: true },
@@ -25,6 +26,7 @@ export function DashboardScreen() {
   const [dashboard, setDashboard] = useState<DashboardViewModel>();
   const [loading, setLoading] = useState(true);
   const [setupComplete, setSetupComplete] = useState(false);
+  const [currentWeightInput, setCurrentWeightInput] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -58,6 +60,12 @@ export function DashboardScreen() {
 
   const { activeDialyzer, latestSession, patient } = dashboard;
   const firstName = patient.name.split(" ")[0] || "caregiver";
+  const enteredCurrentWeightKg = Number(currentWeightInput);
+  const weightGainSinceLastPostHd =
+    latestSession && currentWeightInput.trim()
+      ? calculateWeightGainSinceLastPostHdKg(enteredCurrentWeightKg, latestSession.postWeightKg)
+      : undefined;
+  const weightGainResultTone = weightGainSinceLastPostHd !== undefined && weightGainSinceLastPostHd > 0 ? "warning" : "neutral";
 
   return (
     <div className="space-y-5">
@@ -109,7 +117,7 @@ export function DashboardScreen() {
         <StatusCard
           icon={Stethoscope}
           label="Weight difference"
-          note="Latest pre-HD weight minus dry weight"
+          note="Latest post-HD weight minus dry weight"
           tone={dashboard.weightDifferenceTone}
           value={dashboard.weightDifferenceLabel}
         />
@@ -152,33 +160,94 @@ export function DashboardScreen() {
           <p className="mt-3 text-xs text-brand-muted">
             {activeDialyzer?.lastUsedDate ? `Last used on ${activeDialyzer.lastUsedDate}.` : "Last used date appears after session save."}
           </p>
+
+          <div className="mt-6 lg:mt-8">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <p className="text-sm font-semibold text-brand-ink">All-session analytics</p>
+                <p className="mt-1 text-xs text-brand-muted">Quick averages from saved records.</p>
+              </div>
+              <Badge tone="success">All time</Badge>
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-1">
+              <AnalyticsMiniStat label="Avg pre-HD weight" value={dashboard.averagePreHdWeightLabel} />
+              <AnalyticsMiniStat label="Avg post-HD weight" value={dashboard.averagePostHdWeightLabel} />
+              <AnalyticsMiniStat label="Avg UF removed" value={dashboard.averageUfRemovedLabel} />
+              <AnalyticsMiniStat label="Avg dialyzer use" value={dashboard.averageDialyzerUseCountLabel} />
+            </div>
+          </div>
         </Card>
 
-        <Card>
-          <div className="flex items-center justify-between gap-3">
-            <CardTitle>Quick actions</CardTitle>
-            <Badge tone="success">Ready</Badge>
-          </div>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-            {quickActions.map((action) => {
-              const Icon = action.icon;
-              return (
-                <Link
-                  className={`flex min-h-14 items-center gap-3 rounded-lg border p-3 font-semibold transition ${
-                    "primary" in action && action.primary
-                      ? "border-brand-primary bg-brand-mint text-brand-primary hover:bg-[#D3EFE5]"
-                      : "border-brand-border bg-white text-brand-ink hover:border-brand-primary hover:text-brand-primary"
-                  }`}
-                  href={action.href}
-                  key={action.href}
-                >
-                  <Icon aria-hidden="true" size={20} />
-                  <span>{action.label}</span>
-                </Link>
-              );
-            })}
-          </div>
-        </Card>
+        <div className="space-y-4">
+          <Card>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <CardTitle>Weight calculator</CardTitle>
+                <p className="mt-1 text-sm text-brand-muted">Current weight minus last post-HD weight.</p>
+              </div>
+              <Badge tone={weightGainResultTone === "warning" ? "warning" : "success"}>{latestSession ? "Ready" : "Needs session"}</Badge>
+            </div>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(140px,0.7fr)] lg:grid-cols-1">
+              <Input
+                disabled={!latestSession}
+                inputMode="decimal"
+                label="Current weight"
+                min="0"
+                onChange={(event) => setCurrentWeightInput(event.target.value)}
+                placeholder="Enter kg"
+                step="0.1"
+                type="number"
+                value={currentWeightInput}
+              />
+              <div
+                className={`rounded-lg border p-3 ${
+                  weightGainResultTone === "warning"
+                    ? "border-brand-alert/25 bg-brand-alert/10 text-brand-alert"
+                    : "border-brand-primary/20 bg-brand-mint text-brand-primary"
+                }`}
+              >
+                <p className="text-xs font-medium uppercase tracking-wide">Gain since last HD</p>
+                <p className="mt-1 text-2xl font-semibold">
+                  {weightGainSinceLastPostHd === undefined ? "--" : `${weightGainSinceLastPostHd > 0 ? "+" : ""}${weightGainSinceLastPostHd} kg`}
+                </p>
+              </div>
+            </div>
+
+            <p className="mt-3 text-xs leading-5 text-brand-muted">
+              {latestSession
+                ? `Using last post-HD weight: ${latestSession.postWeightKg} kg from ${dashboard.lastDialysisLabel}.`
+                : "Add a dialysis session first to use the last post-HD weight."}
+            </p>
+          </Card>
+
+          <Card>
+            <div className="flex items-center justify-between gap-3">
+              <CardTitle>Quick actions</CardTitle>
+              <Badge tone="success">Ready</Badge>
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+              {quickActions.map((action) => {
+                const Icon = action.icon;
+                return (
+                  <Link
+                    className={`flex min-h-14 items-center gap-3 rounded-lg border p-3 font-semibold transition ${
+                      "primary" in action && action.primary
+                        ? "border-brand-primary bg-brand-mint text-brand-primary hover:bg-[#D3EFE5]"
+                        : "border-brand-border bg-white text-brand-ink hover:border-brand-primary hover:text-brand-primary"
+                    }`}
+                    href={action.href}
+                    key={action.href}
+                  >
+                    <Icon aria-hidden="true" size={20} />
+                    <span>{action.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </Card>
+        </div>
       </div>
 
       <Card>
@@ -255,5 +324,14 @@ function SummaryItem({ label, value }: { label: string; value: string }) {
       <span className="block font-medium text-brand-ink">{label}</span>
       {value}
     </p>
+  );
+}
+
+function AnalyticsMiniStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-brand-border bg-white/60 p-3">
+      <p className="text-xs font-medium text-brand-muted">{label}</p>
+      <p className="mt-1 text-xl font-semibold text-brand-ink">{value}</p>
+    </div>
   );
 }

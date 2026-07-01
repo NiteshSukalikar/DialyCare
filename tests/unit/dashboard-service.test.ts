@@ -36,6 +36,14 @@ const session: DialysisSession = {
   updatedAt: "2026-06-22T09:00:00.000Z",
 };
 
+const olderSession: DialysisSession = {
+  ...session,
+  id: "session_older",
+  date: "2026-06-20",
+  postWeightKg: 58,
+  ufRemovedLiters: 3.7,
+};
+
 const dialyzer: Dialyzer = {
   id: "dialyzer_1",
   patientId: patient.id,
@@ -47,6 +55,13 @@ const dialyzer: Dialyzer = {
   status: "active",
   createdAt: "2026-06-01T00:00:00.000Z",
   updatedAt: "2026-06-22T09:00:00.000Z",
+};
+
+const archivedDialyzer: Dialyzer = {
+  ...dialyzer,
+  id: "dialyzer_archived",
+  currentUsage: 8,
+  status: "archived",
 };
 
 describe("dashboard service utilities", () => {
@@ -84,16 +99,26 @@ describe("dashboard service utilities", () => {
   });
 
   it("builds dashboard view model labels and warning states", () => {
-    const dashboard = buildDashboardViewModel({ patient, latestSession: session, activeDialyzer: dialyzer });
+    const dashboard = buildDashboardViewModel({
+      patient,
+      latestSession: session,
+      activeDialyzer: dialyzer,
+      sessions: [session, olderSession],
+      dialyzers: [dialyzer, archivedDialyzer],
+    });
 
     expect(dashboard.currentWeightLabel).toBe("58.5 kg");
     expect(dashboard.dryWeightLabel).toBe("57 kg");
-    expect(dashboard.weightDifferenceLabel).toBe("+5.4 kg");
+    expect(dashboard.weightDifferenceLabel).toBe("+1.5 kg");
     expect(dashboard.weightDifferenceTone).toBe("warning");
     expect(dashboard.dialyzerNameLabel).toBe("F8HPS");
     expect(dashboard.dialyzerUsageLabel).toBe("10 / 12");
     expect(dashboard.dialyzerStatusLabel).toBe("Near limit");
     expect(dashboard.dialyzerStatusTone).toBe("warning");
     expect(dashboard.dialyzerUsagePercent).toBe(83);
+    expect(dashboard.averagePreHdWeightLabel).toBe("62.4 kg");
+    expect(dashboard.averagePostHdWeightLabel).toBe("58.3 kg");
+    expect(dashboard.averageUfRemovedLabel).toBe("3.8 L");
+    expect(dashboard.averageDialyzerUseCountLabel).toBe("9 uses");
   });
 });

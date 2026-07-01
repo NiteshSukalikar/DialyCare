@@ -15,6 +15,11 @@ export function calculateWeightGainVsDryKg(preWeightKg: number, dryWeightKg: num
   return Number((preWeightKg - dryWeightKg).toFixed(1));
 }
 
+export function calculateWeightGainSinceLastPostHdKg(currentWeightKg: number, lastPostHdWeightKg: number) {
+  if (!Number.isFinite(currentWeightKg) || !Number.isFinite(lastPostHdWeightKg)) return undefined;
+  return Number((currentWeightKg - lastPostHdWeightKg).toFixed(1));
+}
+
 export function nextDialyzerUseNumber(currentUsage: number) {
   if (!Number.isInteger(currentUsage) || currentUsage < 0) return 1;
   return currentUsage + 1;
