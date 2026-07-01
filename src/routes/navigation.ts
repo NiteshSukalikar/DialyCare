@@ -22,12 +22,4 @@ export const mainRoutes = [
   { href: "/backup", label: "Backup", icon: ShieldCheck },
 ] as const;
 
-export const bottomNavRoutes = [
-  mainRoutes[0],
-  mainRoutes[2],
-  mainRoutes[3],
-  mainRoutes[4],
-  mainRoutes[8],
-] as const;
-
 export type AppRoute = (typeof mainRoutes)[number];

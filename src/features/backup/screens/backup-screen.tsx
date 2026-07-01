@@ -1,7 +1,6 @@
 "use client";
 
 import { Download, FileJson, FileText, RefreshCcw, Save, Settings, Upload } from "lucide-react";
-import Link from "next/link";
 import type { ChangeEvent } from "react";
 import { useEffect, useState } from "react";
 
@@ -174,22 +173,15 @@ export function BackupScreen() {
     return <LoadingState label="Loading backup tools..." />;
   }
 
-  if (!snapshot?.patient) {
-    return (
-      <Card>
-        <CardTitle>Patient setup required</CardTitle>
-        <p className="mt-2 text-sm text-brand-muted">Create the patient profile before exporting backups or doctor summaries.</p>
-        <Link
-          className="mt-4 inline-flex min-h-11 items-center justify-center rounded-lg bg-brand-primary px-4 py-2.5 text-sm font-semibold text-brand-mint shadow-soft transition hover:bg-[#0B5D49]"
-          href="/patient-setup"
-        >
-          Go to patient setup
-        </Link>
-      </Card>
-    );
-  }
-
-  const settings = snapshot.settings[0];
+  const safeSnapshot: BackupSnapshot = snapshot ?? {
+    patients: [],
+    sessions: [],
+    dialyzers: [],
+    medicines: [],
+    documents: [],
+    settings: [],
+  };
+  const settings = safeSnapshot.settings[0];
 
   return (
     <div className="space-y-5">
@@ -230,15 +222,15 @@ export function BackupScreen() {
           <dl className="mt-4 space-y-2 text-sm">
             <div className="flex justify-between gap-3">
               <dt className="text-brand-muted">Sessions</dt>
-              <dd className="font-semibold text-brand-ink">{snapshot.sessions.length}</dd>
+              <dd className="font-semibold text-brand-ink">{safeSnapshot.sessions.length}</dd>
             </div>
             <div className="flex justify-between gap-3">
               <dt className="text-brand-muted">Medicines</dt>
-              <dd className="font-semibold text-brand-ink">{snapshot.medicines.length}</dd>
+              <dd className="font-semibold text-brand-ink">{safeSnapshot.medicines.length}</dd>
             </div>
             <div className="flex justify-between gap-3">
               <dt className="text-brand-muted">Documents</dt>
-              <dd className="font-semibold text-brand-ink">{snapshot.documents.length}</dd>
+              <dd className="font-semibold text-brand-ink">{safeSnapshot.documents.length}</dd>
             </div>
             <div className="flex justify-between gap-3">
               <dt className="text-brand-muted">Last backup</dt>
@@ -363,11 +355,11 @@ export function BackupScreen() {
         <p className="mt-2 text-sm leading-6 text-brand-muted">{appConfig.disclaimer}</p>
       </Card>
 
-      {snapshot.sessions.length === 0 ? (
+      {safeSnapshot.sessions.length === 0 ? (
         <Card>
           <EmptyState
-            description="Backups already work, but PDF summaries become more useful after adding dialysis sessions."
-            title="No dialysis sessions yet"
+            description="You can import an existing JSON backup here, or export an empty starter backup from this browser."
+            title="No local backup data yet"
           />
         </Card>
       ) : null}
